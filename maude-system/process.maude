@@ -1,0 +1,83 @@
+load mset.maude
+load basic.maude
+
+mod PROCESS is
+  protecting ENTAILMENT .
+  sort Process .
+
+  op skip : -> Process .
+  op _||_ : Process Process -> Process [ctor] .
+  op tell : Constraint -> Process .
+  op ask_then_ : Constraint Process -> Process .
+
+endm
+
+view Process from TRIV to PROCESS is
+    sort Elt to Process .
+endv
+
+mod MSET-PROCESS is
+    protecting MSET{Process} .
+endm
+
+mod CONFIG is
+  pr MSET-PROCESS .
+  sort Config .
+
+  op <_;_> : Mset{Process} Set{Constraint} -> Config [ctor] .
+
+  var Lp : Mset{Process} .
+  vars P Q : Process .
+  vars C C' : Constraint .
+  var Lc : Set{Constraint} .
+
+  rl [tell] : < (Lp , tell(C)) ; Lc > => < (Lp) ; (Lc, C) > .
+
+  crl [askthen] : < (Lp , ask C then P) ; Lc > => < (Lp, P)  ; Lc > if Lc |-- C .
+
+  eq < (Lp, P || Q) ; Lc > = < (Lp, P, Q) ; Lc > .
+endm
+
+mod META-CONFIG is
+  pr CONFIG .
+  pr NAT .
+  pr META-LEVEL * (op empty to emptyML , op _\_ to _\M\_ , op _,_ to _C_ , op insert to insert' , op delete to delete', op _in_ to _in'_, op |_| to ||_||, op $card to $card', op union to union' , op intersection to intersection' , op $intersect to $intersect', op $diff to $diff', op _subset_ to _subset'_ , op _psubset_ to _psubset'_ ) .
+
+  op error : -> Config [ctor] .
+  op metaRed : Config -> Config .
+  op metaRew : Config Nat -> Config .
+  op metaApp : Config Qid Substitution -> Config .
+
+  var C : Config .
+  var i : Nat .
+  var S : Substitution .
+  var rule : Qid .
+
+  eq metaApp(C, rule, S) = downTerm(getTerm(metaApply(upModule('META-CONFIG, false), upTerm( C ), rule, S, 0)), error) .
+  eq metaRed( C ) = downTerm(getTerm(metaReduce(upModule('META-CONFIG, false), upTerm( C ))), error) .
+  eq metaRew( C, i ) = downTerm(getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( C ), i)), error) .
+
+
+
+endm
+
+eof
+rew [1] < tell('a) ; 'b > .
+rew [1] < ask 'b then tell('c) ; 'b > .
+
+red metaRew( < tell('a) ; 'b > , 1) .
+red metaRew(< ask 'b then tell('c) ; 'b > , 1) .
+red metaRew(< ask 'b then tell('c) ; 'b > , 2) .
+
+red metaRed(< tell( 'a ) || tell( 'b ) ; 'a > ) .
+red metaApp(< (tell('c) , tell('d /\ 'f), tell('e)  ) ; True >, 'tell, ( 'C:Constraint  <- upTerm('d /\ 'f ) )) .
+red metaApp( < ask 'c then tell('d) , ask 'd then tell('e) ; 'c >, 'askthen, ('C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('d)) ) ) .
+
+red upTerm( < tell('a) ; 'b > ) .
+red downTerm(upTerm( < tell('a) ; 'b > ) ) .
+red upModule(upTerm( 'META-CONFIG ), false )  .
+red metaRewrite(upModule('META-CONFIG, false) , upTerm( < tell('a) ; 'b > ), 1) .
+red getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( < tell('a) ; 'b > ), 1)) .
+red downTerm(getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( < tell('a) ; 'b > ), 1)), < skip ; True >) .
+
+red downTerm(getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( < ask 'b then tell('c) ; 'b > ), 1)), < skip ; True >) .

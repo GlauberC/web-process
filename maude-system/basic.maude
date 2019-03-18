@@ -1,0 +1,50 @@
+fmod ATOM is
+  pr QID .
+  sort Atom .
+  subsort Qid < Atom .
+endfm
+
+fmod CONSTRAINT is
+  pr ATOM .
+  sort Constraint .
+  subsort Atom < Constraint .
+  op True : -> Constraint [ctor] .
+  op _/\_ : Constraint Constraint -> Constraint .
+endfm
+
+view Constraint from TRIV to CONSTRAINT is
+    sort Elt to Constraint .
+endv
+
+fmod SET-CONSTRAINT is
+    pr SET{Constraint} .
+endfm
+
+fmod ENTAILMENT is
+  pr BOOL-OPS .
+  pr SET-CONSTRAINT .
+  pr CONSTRAINT .
+
+  op _|--_ : Set{Constraint} Constraint -> Bool .
+
+  vars L L' : Set{Constraint} .
+  vars C C' : Constraint .
+  vars a b : Atom .
+
+  eq (L , C /\ C')  |-- L' = (L , C , C') |-- L' .
+
+  eq L |-- True = true .
+  eq (L, a) |-- a = true .
+  eq L |-- b = false [owise] .
+
+  eq L |-- C /\ C' = L |-- C and L |-- C' .
+
+endfm
+
+eof
+--- Entailments
+red ('a , 'b  /\ 'c , 'd) |-- 'c .
+red ('a , 'b  /\ 'c , 'd) |-- 'e .
+red 'a /\ 'b /\ 'c /\ 'd |-- 'a /\ 'b .
+red 'a /\ 'b /\ 'c /\ 'd |-- 'a /\ 'b /\ 'c .
+red 'a /\ 'b /\ 'c /\ 'd |-- 'a /\ 'b /\ 'e .
