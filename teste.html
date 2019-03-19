@@ -102,6 +102,16 @@ addInTree(treeData, 9, "ADD9")
 
 plotTree(treeData)
 // console.log(treeData)
+
+
+var re = /;.+/ig
+
+var test = re.exec("< tell('a), tell('c), ask 'b then(tell('d) || tell('e)) ; 'b, 'a, 'c, 'd")
+var string = test[0].replace('>', '').replace(';', '')
+console.log(string)
+
+
+
 function plotTree(treeData){
 
 

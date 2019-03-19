@@ -6,10 +6,27 @@
     const handlebars = require('express-handlebars')
     const bodyParser = require('body-parser')
     const session = require('express-session')
+    const flash = require('connect-flash')
+   
     
 
-
 // Initial config
+    // Sessão
+    app.use(session({
+        secret: "maudewebsession",
+        resave: true,
+        saveUninitialized: true
+    }))
+    app.use(flash())
+
+    // Middleware
+    app.use( (req, res, next) => {
+        res.locals.init_config = req.flash('init_config')
+        res.locals.clickable_procs = req.flash('clickable_procs')
+        res.locals.constraints = req.flash('constraints')
+        next()
+    })
+
     // Handlebars
         app.engine('handlebars', handlebars({defaultLayout: 'main'}))
         app.set('view engine', 'handlebars');
@@ -26,11 +43,7 @@
 
 // Routes
     app.get('/', (req, res) =>{
-        res.render("index")
-    })
-
-    app.get('/config', (req, res) =>{
-        res.send('Teste')
+        res.render("config/initial")
     })
 
     app.use('/mauderequest', mauderequest)
