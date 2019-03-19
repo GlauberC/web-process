@@ -9,7 +9,7 @@ fmod CONSTRAINT is
   sort Constraint .
   subsort Atom < Constraint .
   op True : -> Constraint [ctor] .
-  op _/\_ : Constraint Constraint -> Constraint .
+  op _^_ : Constraint Constraint -> Constraint .
 endfm
 
 view Constraint from TRIV to CONSTRAINT is
@@ -31,20 +31,20 @@ fmod ENTAILMENT is
   vars C C' : Constraint .
   vars a b : Atom .
 
-  eq (L , C /\ C')  |-- L' = (L , C , C') |-- L' .
+  eq (L , C ^ C')  |-- L' = (L , C , C') |-- L' .
 
   eq L |-- True = true .
   eq (L, a) |-- a = true .
   eq L |-- b = false [owise] .
 
-  eq L |-- C /\ C' = L |-- C and L |-- C' .
+  eq L |-- C ^ C' = L |-- C and L |-- C' .
 
 endfm
 
 eof
 --- Entailments
-red ('a , 'b  /\ 'c , 'd) |-- 'c .
-red ('a , 'b  /\ 'c , 'd) |-- 'e .
-red 'a /\ 'b /\ 'c /\ 'd |-- 'a /\ 'b .
-red 'a /\ 'b /\ 'c /\ 'd |-- 'a /\ 'b /\ 'c .
-red 'a /\ 'b /\ 'c /\ 'd |-- 'a /\ 'b /\ 'e .
+red ('a , 'b  ^ 'c , 'd) |-- 'c .
+red ('a , 'b  ^ 'c , 'd) |-- 'e .
+red 'a ^ 'b ^ 'c ^ 'd |-- 'a ^ 'b .
+red 'a ^ 'b ^ 'c ^ 'd |-- 'a ^ 'b ^ 'c .
+red 'a ^ 'b ^ 'c ^ 'd |-- 'a ^ 'b ^ 'e .

@@ -6,7 +6,8 @@
     const handlebars = require('express-handlebars')
     const bodyParser = require('body-parser')
     const session = require('express-session')
-    const flash = require('connect-flash')
+    // const flash = require('connect-flash')
+    const cookieParser = require('cookie-parser')
    
     
 
@@ -17,15 +18,9 @@
         resave: true,
         saveUninitialized: true
     }))
-    app.use(flash())
+    // app.use(flash())
 
-    // Middleware
-    app.use( (req, res, next) => {
-        res.locals.init_config = req.flash('init_config')
-        res.locals.clickable_procs = req.flash('clickable_procs')
-        res.locals.constraints = req.flash('constraints')
-        next()
-    })
+    app.use(cookieParser());
 
     // Handlebars
         app.engine('handlebars', handlebars({defaultLayout: 'main'}))
@@ -43,8 +38,26 @@
 
 // Routes
     app.get('/', (req, res) =>{
-        res.render("config/initial")
+        var initial = req.cookies['init_config']
+        if(!initial){
+            res.render("config/Initial")
+        }else{
+            var clicProcs = req.cookies['clickable_procs']
+            var constr = req.cookies['constraints']
+            res.render("config/metaapp", {'initial': initial,
+                                        'clickable_procs' : clicProcs,
+                                        'constraints' : constr})
+        }
+        
     })
+    app.get('/clearcookies', (req, res) => {
+        res.cookie('current_config', '')
+        res.cookie('init_config', '')
+        res.cookie('clickable_procs', '')
+        res.cookie('constraints', '')
+        res.redirect('/')
+    })
+
 
     app.use('/mauderequest', mauderequest)
 

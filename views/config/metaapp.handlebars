@@ -1,0 +1,12 @@
+
+<p>Initial Configuration: {{initial}}</p> 
+<a href = "/clearcookies"><button class = "btn btn-danger btn-sm btn-block">New Configuration</button></a>
+<hr>
+<h2><
+    {{#each clickable_procs}}
+        {{#if @last}} <a href='/mauderequest/metaapp/{{this}}'>{{this}}</a> {{else}} <a href='/mauderequest/metaapp/{{this}}'>{{this}}</a>, {{/if}}
+    {{/each}}
+    <span>; {{constraints}}</span>
+    >
+<h2>
+<p></p>
