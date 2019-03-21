@@ -8,6 +8,7 @@
     const session = require('express-session')
     // const flash = require('connect-flash')
     const cookieParser = require('cookie-parser')
+    require('dotenv/config')
    
     
 
@@ -64,5 +65,4 @@
 
 
 // Express listen
-var PORT = 3000
-app.listen(PORT, () => console.log(`Server is running in http://localhost:${PORT}`))
+app.listen(process.env.PORT, () => console.log(`Server is running in http://localhost:${process.env.PORT}`))

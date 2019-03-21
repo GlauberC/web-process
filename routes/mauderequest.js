@@ -1,8 +1,8 @@
 
 const express = require('express')
 const router = express.Router()
-const maudeAssist = require('../models/MaudeAssist')
-const stringTreatment = require('../models/StringTreatment')
+const maudeAssist = require('../service/MaudeAssist')
+const stringTreatment = require('../service/StringTreatment')
 
 
 

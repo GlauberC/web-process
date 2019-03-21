@@ -1,7 +1,9 @@
 const shell = require('shelljs')
 const shellescape = require('shell-escape');
+require('dotenv/config')
 
-var DIR_MAUDE = '/usr/bin/maude'
+var DIR_MAUDE = process.env.MAUDE_DIR
+var LIB_MAUDE = process.env.MAUDE_LIB
 var DIR_FILE_MAUDE = "./maude-system/process.maude -no-banner"
 
 module.exports = {
