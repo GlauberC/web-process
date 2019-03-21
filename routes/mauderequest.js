@@ -1,8 +1,8 @@
 
 const express = require('express')
 const router = express.Router()
-const maudeAssist = require('../service/MaudeAssist')
-const stringTreatment = require('../service/StringTreatment')
+const maudeAssist = require('../helpers/MaudeAssist')
+const stringTreatment = require('../helpers/StringTreatment')
 
 
 
@@ -14,7 +14,7 @@ const stringTreatment = require('../service/StringTreatment')
         res.cookie("current_config", initConfig)
         res.cookie("clickable_procs", stringTreatment.getClickable_procs(initConfig))
         res.cookie('constraints', stringTreatment.getConstraints(initConfig))
-        res.redirect('/')
+        res.redirect('/process')
     })
     router.get('/metaApp/:process', (req, res) => {
         var rawResult = maudeAssist.requestMaudeMetaApp(req.cookies['current_config'], req.params.process)
@@ -22,7 +22,7 @@ const stringTreatment = require('../service/StringTreatment')
         res.cookie('current_config', config)
         res.cookie("clickable_procs", stringTreatment.getClickable_procs(config))
         res.cookie('constraints', stringTreatment.getConstraints(config))
-        res.redirect('/')
+        res.redirect('/process')
     })
 
 // Export routes
