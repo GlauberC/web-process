@@ -6,9 +6,9 @@ mod PROCESS is
   sort Process .
 
   op skip : -> Process .
-  op _||_ : Process Process -> Process [ctor] .
+  op _||_ : Process Process -> Process [ctor prec 20] .
   op tell : Constraint -> Process .
-  op ask_then_ : Constraint Process -> Process .
+  op ask_then_ : Constraint Process -> Process [prec 40] .
 
 endm
 
@@ -62,6 +62,9 @@ mod META-CONFIG is
 endm
 
 eof
+
+FUNCIONA: < ask 'c then ( tell( 'd ) || tell( 'g ) ) ; 'c >
+NÃO FUNCIONA: < tell('a) || ask 'c then ( tell( 'd ) || tell( 'g ) ) ; 'c >
 rew [1] < tell('a) ; 'b > .
 rew [1] < ask 'b then tell('c) ; 'b > .
 

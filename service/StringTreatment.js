@@ -17,6 +17,12 @@ module.exports = {
     getTellArgument: function(config){
         return /tell\s*\((.+)\)/ig.exec(config)[1]
     },
+    getAskArgument: function(config){
+        return /ask\s*(.+)then/ig.exec(config)[1]
+    },
+    getThenArgument: function(config){
+        return /then\s*(.+)/ig.exec(config)[1]
+    },
     MaudeResult: function(result){
         var sliceResult = {
             init: result.search('result Config: ') + 'result Config: '.length,

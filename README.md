@@ -13,7 +13,7 @@ Para que o programa rode é necessário realizar o download e a instalação dos
 $ sudo npm install
 ```
 
-Em seguida é necessário configurar as variáveis do Maude. Basta alterar o arquivo .env e informar qual os caminho para o sistema e para o arquivo predule.maude
+Em seguida é necessário configurar as variáveis do Maude. Basta criar o arquivo .env e informar a porta e qual os caminhos para o sistema maude e para o arquivo predule.maude.
 
 ```sh
 PORT = 3000
