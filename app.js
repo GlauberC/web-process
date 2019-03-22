@@ -55,7 +55,7 @@
     app.get('/', (req, res) =>{
         hbs.helpers.activeConfigPage = 'active'
         hbs.helpers.activeProcessPage = ''
-        res.render("config/Initial")        
+        res.render("config/Initial", {inputInitial: req.cookies['inputInitial']})        
     })
     app.get('/process', (req,res) => {
         var initial = req.cookies['init_config']
@@ -67,14 +67,6 @@
                                     'clickable_procs' : clicProcs,
                                     'constraints' : constr})
     })
-    // app.get('/clearcookies', (req, res) => {
-    //     res.cookie('current_config', '')
-    //     res.cookie('init_config', '')
-    //     res.cookie('clickable_procs', '')
-    //     res.cookie('constraints', '')
-    //     res.redirect('/')
-    // })
-
 
     app.use('/mauderequest', mauderequest)
 

@@ -40,7 +40,6 @@ module.exports = {
         var result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
         return result
 
-        return ' '
 
     },
     requestMaudeMetaApp: function (config, process){
@@ -58,13 +57,11 @@ module.exports = {
     },
     requestMaudeParseMetaRed: function (config){
 
-        // var func = `metaRed`
-        // var command = `${func}(${config})`
-        // var command = shellescape(command.split(' '))
-
-        // return command
-        // var result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
-        // return result
+        var func = `metaRed`
+        var command = `${func}(${config})`
+        var command = shellescape(command.split(' '))
+        var result = shell.exec(`timeout 30 sh -c "echo parse ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
+        return result
     }
     
 }
