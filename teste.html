@@ -44,60 +44,64 @@
 <script>
   var idSession = 6;
 
-  function addInTree(treeData, id, bName){
-    test = treeData.forEach( b => {
-      if(b.id == id){
-        var n = b.children.length
-        // Found it
-        newBranch = {'id': idSession, 'name': bName, 'children': []}
-        b.children[`${n}`] = newBranch;
-        idSession++
-      }else if(b.children.length > 0){
-        addInTree(b.children, id, bName)
-      }
-    })
-  }
 
-var treeData = [
-  {
-    "id": 1,
-    "name": "<tell ('b) || tell('c) ; 'a>",
-    "children": [
-      {
-        "id": 2,
-        "name": "<[-] tell('c) ; 'a, 'b>",
-        "children": [
-          {
-            "id": 3,
-            "name": "< skip ; 'a, 'b 'c>",
-            "children" : []
-          }
-        ]
-      },
-      {
-        "id": 4,
-        "name": "<tell ('b) || [-]; 'a>",
-        "children": [
-          {
-            "id": 5,
-            "name": "< skip ; 'a, 'b 'c>",
-            "children" : []
-          }
-        ]
-      }
-    ]
-  }
-];
 
-addInTree(treeData, 1, "ADD1")
-addInTree(treeData, 2, "ADD2")
-addInTree(treeData, 3, "ADD3")
-addInTree(treeData, 4, "ADD4")
-addInTree(treeData, 5, "ADD5")
-addInTree(treeData, 6, "ADD6")
-addInTree(treeData, 7, "ADD7")
-addInTree(treeData, 8, "ADD8")
-addInTree(treeData, 9, "ADD9")
+function branchFactory(name, parent, id=''){
+  var newObject = {
+      'id' : id,
+      'name': name,
+      'parentID': parent,
+      "children" : []
+  } 
+  return newObject
+}
+
+function addInTree(treeData, newBranch){
+  
+  for(var i = 0; i<treeData.length; i++){
+    if(newBranch.parentID === treeData[i].id){
+      var children = treeData[i].children
+      for(var j = 0; j<children.length; j++){
+        if(newBranch.name === children[`${j}`].name){
+          return '';
+        }
+      }
+      newBranch.id = `${newBranch.parentID}.${children.length}`
+      children.push(newBranch)
+      return newBranch.id
+      
+    }else{
+      if(newBranch.parentID.startsWith(treeData[i].id)){
+        addInTree(treeData[i].children, newBranch)
+        return '';
+      }
+    }
+  }
+}
+
+var treeData = []
+a = branchFactory("< tell('b) || tell('c) || tell('d) ; 'a >", 'x', '0')
+treeData.push(a)
+b0 = branchFactory("< tell('c) || tell('d) ; 'a >", '0')
+b1 = branchFactory("< tell('b) || tell('d) ; 'a >", '0')
+b2 = branchFactory("< tell('b) || tell('c) ; 'a >", '0')
+console.log(addInTree(treeData, b0))
+addInTree(treeData, b1)
+addInTree(treeData, b2)
+c0 = branchFactory("< tell('d) ; 'a >", '0.0')
+c1 = branchFactory("< tell('c) ; 'a >", '0.0')
+addInTree(treeData, c0)
+addInTree(treeData, c1)
+
+// addInTree(treeData, 1, "ADD1")
+// addInTree(treeData, 2, "ADD2")
+// addInTree(treeData, 3, "ADD3")
+// addInTree(treeData, 4, "ADD4")
+// addInTree(treeData, 5, "ADD5")
+// addInTree(treeData, 6, "ADD6")
+// addInTree(treeData, 7, "ADD7")
+// addInTree(treeData, 8, "ADD8")
+// addInTree(treeData, 9, "ADD9")
 // console.log(treeData)
 
 plotTree(treeData)
