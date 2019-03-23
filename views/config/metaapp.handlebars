@@ -1,16 +1,28 @@
-{{#each erros}}
-    <div class = "alert alert-danger">{{texto}} </div>
-{{else}}
-{{/each}}
+<p hidden class = 'hiddenTreeData'>{{treeData}}</p>
 
+<form hidden action = "/mauderequest/changeBranch" method="POST">
+    <input id = 'idBranch' type="text" name="id">
+    <button class="submitAcessBranch">SubmitAcess</button>
+</form>
 
-<p>Initial Configuration: {{initial}}</p> 
-<a href = "/clearcookies">
-<hr>
-<h2>
+<h2 class = "mt-4">Configuration:</h2>
+<h4 class = "mt-4">
+    <
     {{#each clickable_procs}}
-        {{#if @last}} <a href='/mauderequest/metaapp/{{this}}'>{{this}}</a> {{else}} <a href='/mauderequest/metaapp/{{this}}'>{{this}}</a>, {{/if}}
+        <a class = 'btn btn-light' href='/mauderequest/metaapp/{{this}}'>{{this}}</a>{{#if @last}}{{else}},{{/if}}
     {{/each}}
     <span>; {{constraints}}</span>
-    </p>
-<h2>
+    >
+</h4>
+<hr>
+    {{>tree}}
+    
+    <h3>Tree View:</h3>
+    <div class = 'treeSvg'>
+
+    </div>
+
+    
+<script>
+    plotTree(document.querySelector('.hiddenTreeData').textContent, '{{currentId}}')
+</script>

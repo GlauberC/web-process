@@ -24,6 +24,7 @@
     app.use( (req, res, next) => {
         res.locals.success_msg = req.flash('success_msg')
         res.locals.error_msg = req.flash('error_msg')
+        res.locals.warning_msg = req.flash('warning_msg')
         next()
     })
 
@@ -36,7 +37,7 @@
         partialsDir: path.join(__dirname, 'views/pieces'),
         helpers:{
             activeConfigPage: 'active',
-            activeProcessPage: ''
+            activeProcessPage: '',
         }
     })
     app.engine('handlebars', hbs.engine)
@@ -58,14 +59,16 @@
         res.render("config/Initial", {inputInitial: req.cookies['inputInitial']})        
     })
     app.get('/process', (req,res) => {
-        var initial = req.cookies['init_config']
+        var currentId = req.cookies['current_branch'].id
         var clicProcs = req.cookies['clickable_procs']
         var constr = req.cookies['constraints']
+        var tree = req.cookies['tree']
         hbs.helpers.activeConfigPage = ''
         hbs.helpers.activeProcessPage = 'active'
-        res.render("config/metaapp", {'initial': initial,
+        res.render("config/metaapp", {'currentId': currentId,
                                     'clickable_procs' : clicProcs,
-                                    'constraints' : constr})
+                                    'constraints' : constr,
+                                    'treeData': JSON.stringify(tree)})
     })
 
     app.use('/mauderequest', mauderequest)
