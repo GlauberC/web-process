@@ -5,12 +5,17 @@
     <button class="submitAcessBranch">SubmitAcess</button>
 </form>
 
+
 <h2 class = "mt-4">Configuration:</h2>
 <h4 class = "mt-4">
     <
-    {{#each clickable_procs}}
-        <a class = 'btn btn-light' href='/mauderequest/metaapp/{{this}}'>{{this}}</a>{{#if @last}}{{else}},{{/if}}
-    {{/each}}
+    {{#unless isTerminal}}
+        {{#each clickable_procs}}
+            <a class = 'btn btn-light' href='/mauderequest/metaapp/{{this}}'>{{this}}</a>{{#if @last}}{{else}},{{/if}}      
+        {{/each}}
+    {{else}}
+        empty 
+    {{/unless}}
     <span>; {{constraints}}</span>
     >
 </h4>

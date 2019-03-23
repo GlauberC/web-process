@@ -9,6 +9,7 @@
     const flash = require('connect-flash')
     const cookieParser = require('cookie-parser')
     require('dotenv/config')
+    const stringTreatment = require('./helpers/StringTreatment')
    
     
 
@@ -59,15 +60,17 @@
         res.render("config/Initial", {inputInitial: req.cookies['inputInitial']})        
     })
     app.get('/process', (req,res) => {
-        var currentId = req.cookies['current_branch'].id
+        var currentBranch= req.cookies['current_branch']
         var clicProcs = req.cookies['clickable_procs']
         var constr = req.cookies['constraints']
         var tree = req.cookies['tree']
         hbs.helpers.activeConfigPage = ''
         hbs.helpers.activeProcessPage = 'active'
-        res.render("config/metaapp", {'currentId': currentId,
+        var isTerminal = stringTreatment.isTerminalConfiguration(currentBranch.name)
+        res.render("config/metaapp", {'currentId': currentBranch.id,
                                     'clickable_procs' : clicProcs,
                                     'constraints' : constr,
+                                    'isTerminal':isTerminal,
                                     'treeData': JSON.stringify(tree)})
     })
 

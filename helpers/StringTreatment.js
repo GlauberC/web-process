@@ -29,5 +29,8 @@ module.exports = {
             end: result.search('Maude> Bye.')
         }
         return result.substring(sliceResult.init, sliceResult.end)
-    }
+    },
+    isTerminalConfiguration: function(config){
+        return /empty\s*;/ig.test(config)
+    },
 }
