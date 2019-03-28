@@ -22,13 +22,13 @@ const modelTree = require('../models/Tree')
             var rawResult = maudeAssist.requestMaudeMetaRed(req.body.config)
             var initConfig = stringTreatment.MaudeResult(rawResult)
             var tree = []
-            var newBranch = modelTree.branchFactory(initConfig, 'x', '0')
+            var clickable_procs = stringTreatment.getClickable_procs(initConfig)
+            var constraints = stringTreatment.getConstraints(initConfig)
+            var newBranch = modelTree.branchFactory(initConfig, 'x', clickable_procs, constraints, '0')
             tree.push(newBranch)
             res.cookie("tree", tree)
             res.cookie("init_config", initConfig)
             res.cookie("current_branch", newBranch)
-            res.cookie("clickable_procs", stringTreatment.getClickable_procs(initConfig))
-            res.cookie('constraints', stringTreatment.getConstraints(initConfig))
             req.flash('success_msg', 'New configuration started')
             res.redirect('/process')
         })
@@ -38,8 +38,10 @@ const modelTree = require('../models/Tree')
         })
     })
 
-    router.get('/metaApp/:process', (req, res) => {
-        var current_branch =  req.cookies['current_branch']
+    router.get('/metaApp/:process/:id', (req, res) => {
+        var tree = req.cookies['tree']
+        var current_branch =  modelTree.seachInTree(tree, req.params.id)
+        console.log()
         new Promise((resolve, reject) => {
             var rawResult = maudeAssist.requestMaudeMetaApp(current_branch.name, req.params.process)
             if(/result Config: error/ig.test(rawResult)){
@@ -47,16 +49,15 @@ const modelTree = require('../models/Tree')
             }else{resolve(rawResult)}
         }).then(rawResult => {
             var config = stringTreatment.MaudeResult(rawResult)
-            var tree = req.cookies['tree']
-            var newBranch = modelTree.branchFactory(config, current_branch.id)
+            var clickable_procs = stringTreatment.getClickable_procs(config)
+            var constraints = stringTreatment.getConstraints(config)
+            var newBranch = modelTree.branchFactory(config, current_branch.id, clickable_procs, constraints)
             var status = modelTree.addInTree(tree, newBranch)
             if (status == 'OAE'){
                 req.flash('warning_msg', 'This operation already be executed')
             }else{
                 res.cookie("current_branch", newBranch)
                 res.cookie("tree", tree)
-                res.cookie("clickable_procs", stringTreatment.getClickable_procs(config))
-                res.cookie('constraints', stringTreatment.getConstraints(config))
                 req.flash('success_msg', 'The command was executed successfully')
             }
             res.redirect('/process')

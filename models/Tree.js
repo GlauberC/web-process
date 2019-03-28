@@ -1,11 +1,13 @@
 module.exports = {
 
 
-branchFactory: function(name, parent, id=''){
+  branchFactory: function(name, parent, clickable, constraints, id=''){
     var newObject = {
         'id' : id,
         'name': name,
         'parentID': parent,
+        'clickableProcs': clickable,
+        'const': constraints,
         "children" : []
     } 
     return newObject

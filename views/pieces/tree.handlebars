@@ -1,5 +1,16 @@
 <script>
 
+    $(document).ready(function(){
+        $('.treeSvg').click((e) => {
+          if($(e.target.parentNode).hasClass('node')){
+            $(e.target.parentNode).popover({html: true})
+          }else{
+            $('[data-toggle="popover"]').popover('hide')
+          }
+
+        })
+    });
+
 
     function plotTree(treeData, selectedId){
     // ************** Generate the tree diagram	 *****************   
@@ -56,6 +67,19 @@
       // Enter any new nodes at the parent's previous position.
       var nodeEnter = node.enter().append("g")
         .attr("class", "node")
+        .attr("data-toggle", "popover")
+        .attr("data-content", function(d){
+          var ret = ''
+          for(var i = 0; i<d.clickableProcs.length; i++){
+            ret += `<a href = "/mauderequest/metaapp/${encodeURI(d.clickableProcs[i])}/${d.id}">${d.clickableProcs[i]}</a>`
+            if(i<d.clickableProcs.length-1){
+              ret+= ' ,'
+            }
+          }
+          return ret
+        })
+        .attr("tabindex", "0")
+        .attr("data-placement", "top")
         .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
         .on("click", click)
         .on("dblclick", dblclick);;
@@ -68,7 +92,7 @@
         .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
         .attr("dy", ".35em")
         .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-        .text(function(d) { return d.name; })
+        .text(function(d) { return d.id; })
         .style("fill-opacity", 1e-6);
   
       // Transition nodes to their new position.
@@ -133,19 +157,19 @@
   
     // Toggle children on click.
     function click(d) {
-      if (d.children) {
-      d._children = d.children;
-      d.children = null;
-      } else {
-      d.children = d._children;
-      d._children = null;
-      }
-      update(d);
+      //document.querySelector('#idBranch').value = d.id
+      //document.querySelector('.submitAcessBranch').click()
     }
     function dblclick(d) {
-      document.querySelector('#idBranch').value = d.id
-      document.querySelector('.submitAcessBranch').click()
-      
+
+      if (d.children) {
+        d._children = d.children;
+        d.children = null;
+      } else {
+        d.children = d._children;
+        d._children = null;
+      }
+      update(d);
     }
   }
 </script>
