@@ -9,7 +9,7 @@ mod PROCESS is
   op _||_ : Process Process -> Process [ctor prec 20] .
   op tell : Constraint -> Process .
   op ask_then_ : Constraint Process -> Process [prec 40] .
-
+  op _+_ : Process Process -> Process .
 endm
 
 view Process from TRIV to PROCESS is
@@ -20,22 +20,48 @@ mod MSET-PROCESS is
     protecting MSET{Process} .
 endm
 
-mod CONFIG is
+
+mod DEFINITION is
   pr MSET-PROCESS .
+  sort Def .
+
+  op def : Qid Process -> Def [ctor] .
+  op call : Qid -> Process [ctor] .
+
+endm
+
+view Def from TRIV to DEFINITION is
+    sort Elt to Def .
+endv
+
+mod SET-DEFINITION is
+    protecting SET{Def} .
+endm
+
+
+
+
+mod CONFIG is
+  pr SET-DEFINITION .
   sort Config .
 
   op <_;_> : Mset{Process} Set{Constraint} -> Config [ctor] .
 
   var Lp : Mset{Process} .
   vars P Q : Process .
-  vars C C' : Constraint .
+  vars c d   : Constraint .
   var Lc : Set{Constraint} .
 
-  rl [tell] : < (Lp , tell(C)) ; Lc > => < (Lp) ; (Lc, C) > .
+  rl [tell] : < (Lp , tell(c)) ; Lc > => < (Lp) ; (Lc, c) > .
 
-  crl [askthen] : < (Lp , ask C then P) ; Lc > => < (Lp, P)  ; Lc > if Lc |-- C .
+  crl [sum] : < Lp, ask c then P + Q ; Lc > => < Lp, P ; Lc > if Lc |-- c .  *** Certo ser Set de Constraint ?
+
+  crl [askthen] : < (Lp , ask c then P) ; Lc > => < (Lp, P)  ; Lc > if Lc |-- c .
 
   eq < (Lp, P || Q) ; Lc > = < (Lp, P, Q) ; Lc > .
+
+
+
 endm
 
 mod META-CONFIG is
@@ -63,17 +89,19 @@ endm
 
 eof
 
-FUNCIONA: < ask 'c then ( tell( 'd ) || tell( 'g ) ) ; 'c >
-NÃO FUNCIONA: < tell('a) || ask 'c then ( tell( 'd ) || tell( 'g ) ) ; 'c >
-rew [1] < tell('a) ; 'b > .
-rew [1] < ask 'b then tell('c) ; 'b > .
+
+rew [1] < ask 'b then tell('c) + ask 'd then tell('e) ; 'b > .
+red metaApp( < ask 'c then tell('d) + ask 'd then tell('e) ; 'c >, 'sum, ('C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('d)) ) ) .
+red metaApp( < ask 'c then tell('d) + ask 'd then tell('e) ; 'c >, 'sum, ('C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** error function
+red metaApp( < ask 'c then tell('d) + ask 'd then tell('e) ; 'd >, 'sum, ('C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** correct function
 
 red metaRew( < tell('a) ; 'b > , 1) .
 red metaRew(< ask 'b then tell('c) ; 'b > , 1) .
 red metaRew(< ask 'b then tell('c) ; 'b > , 2) .
 
+
 red metaRed(< tell( 'a ) || tell( 'b ) ; 'a > ) .
-red metaApp(< (tell('c) , tell('d /\ 'f), tell('e)  ) ; True >, 'tell, ( 'C:Constraint  <- upTerm('d /\ 'f ) )) .
+red metaApp(< (tell('c) , tell('d ^ 'f), tell('e)  ) ; True >, 'tell, ( 'C:Constraint  <- upTerm('d ^ 'f ) )) .
 red metaApp( < ask 'c then tell('d) , ask 'd then tell('e) ; 'c >, 'askthen, ('C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('d)) ) ) .
 
 red upTerm( < tell('a) ; 'b > ) .
