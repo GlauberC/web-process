@@ -20,18 +20,21 @@ fmod SET-CONSTRAINT is
     pr SET{Constraint} .
 endfm
 
-fmod ENTAILMENT is
+fmod CONSTRAINTS-OPERATIONS is
   pr BOOL-OPS .
   pr SET-CONSTRAINT .
   pr CONSTRAINT .
 
   op _|--_ : Set{Constraint} Constraint -> Bool .
+  op minus : Set{Constraint} Set{Constraint} -> Set{Constraint} .
 
-  vars L L' : Set{Constraint} .
+  vars L L' S S' : Set{Constraint} .
   vars C C' : Constraint .
-  vars a b : Atom .
+  vars a b c d : Atom .
 
   eq (L , C ^ C')  |-- L' = (L , C , C') |-- L' .
+
+  eq minus((L, S), (L', S)) = L .
 
   eq L |-- True = true .
   eq (L, a) |-- a = true .
@@ -43,8 +46,9 @@ endfm
 
 eof
 --- Entailments
-red ('a , 'b  ^ 'c , 'd) |-- 'c .
-red ('a , 'b  ^ 'c , 'd) |-- 'e .
-red 'a ^ 'b ^ 'c ^ 'd |-- 'a ^ 'b .
-red 'a ^ 'b ^ 'c ^ 'd |-- 'a ^ 'b ^ 'c .
-red 'a ^ 'b ^ 'c ^ 'd |-- 'a ^ 'b ^ 'e .
+red minus(('a, 'b, 'c) , ('a, 'b ) ) .
+
+red minus(('a, 'b, 'c) , ('a, 'b, 'c) ) .
+
+red minus( ('a, 'b ), ('a, 'b, 'c )) .
+red minus( ('a, 'b ), ('a, 'd )) .

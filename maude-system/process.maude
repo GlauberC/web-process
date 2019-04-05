@@ -1,15 +1,22 @@
 load mset.maude
-load basic.maude
+load constraint.maude
 
 mod PROCESS is
-  protecting ENTAILMENT .
-  sort Process .
+  protecting CONSTRAINTS-OPERATIONS .
+  sorts Process AskProcess .
+  subsort AskProcess < Process .
 
   op skip : -> Process .
   op _||_ : Process Process -> Process [ctor prec 20] .
   op tell : Constraint -> Process .
-  op ask_then_ : Constraint Process -> Process [prec 40] .
-  op _+_ : Process Process -> Process .
+
+
+  op ask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
+  op lask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
+  op _+_ : AskProcess AskProcess -> AskProcess [comm assoc] .
+  op zero : -> AskProcess [ctor] .
+
+
 endm
 
 view Process from TRIV to PROCESS is
@@ -45,20 +52,31 @@ mod CONFIG is
   pr SET-DEFINITION .
   sort Config .
 
-  op <_;_> : Mset{Process} Set{Constraint} -> Config [ctor] .
+  op <_;_;_>  : Set{Def} Mset{Process} Set{Constraint} -> Config [ctor] .
+
 
   var Lp : Mset{Process} .
-  vars P Q : Process .
+  var Pa : AskProcess .
+
+  vars P P1 : Process .
   vars c d   : Constraint .
   var Lc : Set{Constraint} .
+  var Ld : Set{Def} .
+  var q : Qid .
 
-  rl [tell] : < (Lp , tell(c)) ; Lc > => < (Lp) ; (Lc, c) > .
 
-  crl [sum] : < Lp, ask c then P + Q ; Lc > => < Lp, P ; Lc > if Lc |-- c .  *** Certo ser Set de Constraint ?
+  rl [tell] : < Ld ; (Lp , tell(c)) ; Lc > => < Ld ; (Lp) ; (Lc, c) > .
 
-  crl [askthen] : < (Lp , ask c then P) ; Lc > => < (Lp, P)  ; Lc > if Lc |-- c .
+  crl [askthen] : < Ld ;  (Lp , ask c then P) ; Lc > => < Ld ; (Lp, P)  ; Lc > if Lc |-- c .
+  crl [laskthen] : < Ld ;  (Lp , lask c then P) ; Lc > => < Ld ; (Lp, P)  ; minus(Lc, c) > if Lc |-- c .
 
-  eq < (Lp, P || Q) ; Lc > = < (Lp, P, Q) ; Lc > .
+  crl [sum] : < Ld ; Lp, ask c then P + Pa ; Lc > => < Ld ; Lp, P ; Lc > if Lc |-- c .
+  crl [lsum] : < Ld ; Lp, lask c then P + Pa ; Lc > => < Ld ; Lp, P ; minus(Lc, c) > if Lc |-- c .
+
+  rl [call] : < ( def(q, P) , Ld) ; (Lp , call(q)) ; Lc > => < ( def(q, P) , Ld)  ; (Lp, P) ; Lc > .
+
+
+  eq < Ld ; (Lp, P || P1 ) ; Lc > = < Ld ; (Lp, P, P1) ; Lc > .
 
 
 
@@ -89,26 +107,49 @@ endm
 
 eof
 
+*** metaApp
+  *** tell
+red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) ; 'a >, 'tell, ( 'C:Constraint <- upTerm('c) ) ) .
 
-rew [1] < ask 'b then tell('c) + ask 'd then tell('e) ; 'b > .
-red metaApp( < ask 'c then tell('d) + ask 'd then tell('e) ; 'c >, 'sum, ('C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('d)) ) ) .
-red metaApp( < ask 'c then tell('d) + ask 'd then tell('e) ; 'c >, 'sum, ('C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** error function
-red metaApp( < ask 'c then tell('d) + ask 'd then tell('e) ; 'd >, 'sum, ('C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** correct function
+  *** askthen
+red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'a >, 'askthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'b >, 'askthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) . *** proposital error
 
-red metaRew( < tell('a) ; 'b > , 1) .
-red metaRew(< ask 'b then tell('c) ; 'b > , 1) .
-red metaRew(< ask 'b then tell('c) ; 'b > , 2) .
+  *** laskthen
+red metaApp( < def( 'd1, tell('a) ) ; lask 'a then (tell('b)) ; 'a >, 'laskthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; lask 'b then (tell('b)) ; 'a >, 'laskthen, ( 'C:Constraint <- upTerm('b) ; 'P:Process <- upTerm(tell('b)) ) ) .
+
+  *** sum
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'c then tell('e) + ask 'd then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'c then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'a then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
+
+  ***lsum
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'c then tell('e) + lask 'd then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'c then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'a then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
+
+  *** call
+red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('d1) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d1) ) ) .
+red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d2) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d2) ) ) .
+red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d1) || call('d2) ; 'b >, 'call, ( 'Q:Qid <- upTerm('test) ) ) . *** RESPOSTA NÃO ESPERADA
+red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('f1) ; 'b >, 'call, ( 'Q:Qid <- upTerm('f1) ) ) . *** proposital error
 
 
-red metaRed(< tell( 'a ) || tell( 'b ) ; 'a > ) .
-red metaApp(< (tell('c) , tell('d ^ 'f), tell('e)  ) ; True >, 'tell, ( 'C:Constraint  <- upTerm('d ^ 'f ) )) .
-red metaApp( < ask 'c then tell('d) , ask 'd then tell('e) ; 'c >, 'askthen, ('C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('d)) ) ) .
+*** metaRed
+  *** tell
+red metaRed( < def( 'd1, tell('a) ) ; tell( 'c ) || tell('b )  ; 'a > ) .
+red metaRed( < def( 'd1, tell('a) ) ; tell( 'c ) || tell('b ) || tell('c)  ; 'a > ) . *** Warning de ambiguidade
 
-red upTerm( < tell('a) ; 'b > ) .
-red downTerm(upTerm( < tell('a) ; 'b > ) ) .
-red upModule(upTerm( 'META-CONFIG ), false )  .
-red metaRewrite(upModule('META-CONFIG, false) , upTerm( < tell('a) ; 'b > ), 1) .
-red getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( < tell('a) ; 'b > ), 1)) .
-red downTerm(getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( < tell('a) ; 'b > ), 1)), < skip ; True >) .
+  *** askthen
+red metaRed( < def( 'd1, tell('a) ) ; ( ask 'a then (tell('b)) ) || tell('d) ; 'a > ) . *** TROCOU A ORDEM
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b)) ) ; 'a > ) .
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b) || tell('c)) ) ; 'a > ) . *** O parentesis dentro do then foi eliminado, não foi resolvido a operação askthen(P || P)
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b)) ) || tell('f) ; 'a > ) . *** TROCOU A ORDEM
 
-red downTerm(getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( < ask 'b then tell('c) ; 'b > ), 1)), < skip ; True >) .
+  *** sum
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'c then tell('e) + ask 'd then tell('f) ) || tell('g) ; 'c > ) . *** warning de ambiguidade
+
+  *** call
+red metaRed( < def( 'd1, tell('a) ) ; call('d2) || tell('g) ; 'c > ) .
+red metaRed( < def( 'd1, tell('a) ) ; ( call('d2)  || tell('g))  || (call('d2) || tell('b')) ; 'c > ) . *** TROCOU A ORDEM
