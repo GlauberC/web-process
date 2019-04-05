@@ -132,7 +132,7 @@ red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'a then tell
   *** call
 red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('d1) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d1) ) ) .
 red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d2) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d2) ) ) .
-red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d1) || call('d2) ; 'b >, 'call, ( 'Q:Qid <- upTerm('test) ) ) . *** RESPOSTA NÃO ESPERADA
+red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d1) || call('d2) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d2) ) ) . *** RESPOSTA NÃO ESPERADA
 red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('f1) ; 'b >, 'call, ( 'Q:Qid <- upTerm('f1) ) ) . *** proposital error
 
 
