@@ -1,0 +1,155 @@
+load mset.maude
+load constraint.maude
+
+mod PROCESS is
+  protecting CONSTRAINTS-OPERATIONS .
+  sorts Process AskProcess .
+  subsort AskProcess < Process .
+
+  op skip : -> Process .
+  op _||_ : Process Process -> Process [ctor prec 20] .
+  op tell : Constraint -> Process .
+
+
+  op ask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
+  op lask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
+  op _+_ : AskProcess AskProcess -> AskProcess [comm assoc] .
+  op zero : -> AskProcess [ctor] .
+
+
+endm
+
+view Process from TRIV to PROCESS is
+    sort Elt to Process .
+endv
+
+mod MSET-PROCESS is
+    protecting MSET{Process} .
+endm
+
+
+mod DEFINITION is
+  pr MSET-PROCESS .
+  sort Def .
+
+  op def : Qid Process -> Def [ctor] .
+  op call : Qid -> Process [ctor] .
+
+endm
+
+view Def from TRIV to DEFINITION is
+    sort Elt to Def .
+endv
+
+mod SET-DEFINITION is
+    protecting SET{Def} .
+endm
+
+
+
+
+mod CONFIG is
+  pr SET-DEFINITION .
+  sort Config .
+
+  op <_;_;_>  : Set{Def} Mset{Process} Set{Constraint} -> Config [ctor] .
+
+
+  var Lp : Mset{Process} .
+  var Pa : AskProcess .
+
+  vars P P1 : Process .
+  vars c d   : Constraint .
+  var Lc : Set{Constraint} .
+  var Ld : Set{Def} .
+  var q : Qid .
+
+
+  rl [tell] : < Ld ; (Lp , tell(c)) ; Lc > => < Ld ; (Lp) ; (Lc, c) > .
+
+  crl [askthen] : < Ld ;  (Lp , ask c then P) ; Lc > => < Ld ; (Lp, P)  ; Lc > if Lc |-- c .
+  crl [laskthen] : < Ld ;  (Lp , lask c then P) ; Lc > => < Ld ; (Lp, P)  ; minus(Lc, c) > if Lc |-- c .
+
+  crl [sum] : < Ld ; Lp, ask c then P + Pa ; Lc > => < Ld ; Lp, P ; Lc > if Lc |-- c .
+  crl [lsum] : < Ld ; Lp, lask c then P + Pa ; Lc > => < Ld ; Lp, P ; minus(Lc, c) > if Lc |-- c .
+
+  rl [call] : < ( def(q, P) , Ld) ; (Lp , call(q)) ; Lc > => < ( def(q, P) , Ld)  ; (Lp, P) ; Lc > .
+
+
+  eq < Ld ; (Lp, P || P1 ) ; Lc > = < Ld ; (Lp, P, P1) ; Lc > .
+
+
+
+endm
+
+mod META-CONFIG is
+  pr CONFIG .
+  pr NAT .
+  pr META-LEVEL * (op empty to emptyML , op _\_ to _\M\_ , op _,_ to _C_ , op insert to insert' , op delete to delete', op _in_ to _in'_, op |_| to ||_||, op $card to $card', op union to union' , op intersection to intersection' , op $intersect to $intersect', op $diff to $diff', op _subset_ to _subset'_ , op _psubset_ to _psubset'_ ) .
+
+  op error : -> Config [ctor] .
+  op metaRed : Config -> Config .
+  op metaRew : Config Nat -> Config .
+  op metaApp : Config Qid Substitution -> Config .
+
+  var C : Config .
+  var i : Nat .
+  var S : Substitution .
+  var rule : Qid .
+
+  eq metaApp(C, rule, S) = downTerm(getTerm(metaApply(upModule('META-CONFIG, false), upTerm( C ), rule, S, 0)), error) .
+  eq metaRed( C ) = downTerm(getTerm(metaReduce(upModule('META-CONFIG, false), upTerm( C ))), error) .
+  eq metaRew( C, i ) = downTerm(getTerm(metaRewrite(upModule('META-CONFIG, false) , upTerm( C ), i)), error) .
+
+
+
+endm
+
+eof
+
+*** metaApp
+  *** tell
+red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) ; 'a >, 'tell, ( 'C:Constraint <- upTerm('c) ) ) .
+
+  *** askthen
+red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'a >, 'askthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'b >, 'askthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) . *** proposital error
+
+  *** laskthen
+red metaApp( < def( 'd1, tell('a) ) ; lask 'a then (tell('b)) ; 'a >, 'laskthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; lask 'b then (tell('b)) ; 'a >, 'laskthen, ( 'C:Constraint <- upTerm('b) ; 'P:Process <- upTerm(tell('b)) ) ) .
+
+  *** sum
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'c then tell('e) + ask 'd then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'c then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'a then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
+
+  ***lsum
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'c then tell('e) + lask 'd then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'c then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'a then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
+
+  *** call
+red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('d1) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d1) ) ) .
+red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d2) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d2) ) ) .
+red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d1) || call('d2) ; 'b >, 'call, ( 'Q:Qid <- upTerm('d2) ) ) . *** RESPOSTA NÃO ESPERADA
+red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('f1) ; 'b >, 'call, ( 'Q:Qid <- upTerm('f1) ) ) . *** proposital error
+
+
+*** metaRed
+  *** tell
+red metaRed( < def( 'd1, tell('a) ) ; tell( 'c ) || tell('b )  ; 'a > ) .
+red metaRed( < def( 'd1, tell('a) ) ; tell( 'c ) || tell('b ) || tell('c)  ; 'a > ) . *** Warning de ambiguidade
+
+  *** askthen
+red metaRed( < def( 'd1, tell('a) ) ; ( ask 'a then (tell('b)) ) || tell('d) ; 'a > ) . *** TROCOU A ORDEM
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b)) ) ; 'a > ) .
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b) || tell('c)) ) ; 'a > ) . *** O parentesis dentro do then foi eliminado, não foi resolvido a operação askthen(P || P)
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b)) ) || tell('f) ; 'a > ) . *** TROCOU A ORDEM
+
+  *** sum
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'c then tell('e) + ask 'd then tell('f) ) || tell('g) ; 'c > ) . *** warning de ambiguidade
+
+  *** call
+red metaRed( < def( 'd1, tell('a) ) ; call('d2) || tell('g) ; 'c > ) .
+red metaRed( < def( 'd1, tell('a) ) ; ( call('d2)  || tell('g))  || (call('d2) || tell('b')) ; 'c > ) . *** TROCOU A ORDEM

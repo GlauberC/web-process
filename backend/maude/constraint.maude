@@ -1,0 +1,54 @@
+fmod ATOM is
+  pr QID .
+  sort Atom .
+  subsort Qid < Atom .
+endfm
+
+fmod CONSTRAINT is
+  pr ATOM .
+  sort Constraint .
+  subsort Atom < Constraint .
+  op True : -> Constraint [ctor] .
+  op _^_ : Constraint Constraint -> Constraint .
+endfm
+
+view Constraint from TRIV to CONSTRAINT is
+    sort Elt to Constraint .
+endv
+
+fmod SET-CONSTRAINT is
+    pr SET{Constraint} .
+endfm
+
+fmod CONSTRAINTS-OPERATIONS is
+  pr BOOL-OPS .
+  pr SET-CONSTRAINT .
+  pr CONSTRAINT .
+
+  op _|--_ : Set{Constraint} Constraint -> Bool .
+  op minus : Set{Constraint} Set{Constraint} -> Set{Constraint} .
+
+  vars L L' S S' : Set{Constraint} .
+  vars C C' : Constraint .
+  vars a b c d : Atom .
+
+  eq (L , C ^ C')  |-- L' = (L , C , C') |-- L' .
+
+  eq minus((L, S), (L', S)) = L .
+
+  eq L |-- True = true .
+  eq (L, a) |-- a = true .
+  eq L |-- b = false [owise] .
+
+  eq L |-- C ^ C' = L |-- C and L |-- C' .
+
+endfm
+
+eof
+--- Entailments
+red minus(('a, 'b, 'c) , ('a, 'b ) ) .
+
+red minus(('a, 'b, 'c) , ('a, 'b, 'c) ) .
+
+red minus( ('a, 'b ), ('a, 'b, 'c )) .
+red minus( ('a, 'b ), ('a, 'd )) .

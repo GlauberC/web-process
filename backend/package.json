@@ -1,0 +1,22 @@
+{
+  "name": "maudeprocessview",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "MAUDE_DIR='/usr/bin/maude' mocha",
+    "start": "MAUDE_DIR='/usr/bin/maude' node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.1",
+    "dotenv": "^7.0.0",
+    "express": "^4.16.4",
+    "shell-escape": "^0.2.0",
+    "shelljs": "^0.8.3"
+  }
+}
