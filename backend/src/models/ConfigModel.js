@@ -3,7 +3,6 @@ module.exports = (definitions, process, constraints, clickProcess = '') => {
         definitions: definitions,
         process: process,
         constaints: constraints,
-        clickProcess: clickProcess
-
+        clickProcess: clickProcess,
     }
 }
