@@ -16,7 +16,7 @@ describe('Maude metaApply Test', () => {
             "'d",
             "tell('a)"
         )
-        let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constaints} > `
+        let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constraints} > `
         chai.request(server)
             
             .get(`/maude/${entireConfig}/${config1.clickProcess}`)
@@ -24,7 +24,7 @@ describe('Maude metaApply Test', () => {
             .end( (err, res) => {
                 res.should.have.status(200)
                 res.body.process.should.be.equal(`tell('c)`)
-                res.body.constaints.should.be.equal(`'a, 'd`)
+                res.body.constraints.should.be.equal(`'a, 'd`)
                 done()
         })
     })
@@ -37,7 +37,7 @@ describe('Maude metaApply Test', () => {
             "'d",
             "ask 'd then tell ('b)"
         )
-        let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constaints} > `
+        let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constraints} > `
         chai.request(server)
             
             .get(`/maude/${entireConfig}/${config1.clickProcess}`)
@@ -45,7 +45,7 @@ describe('Maude metaApply Test', () => {
             .end( (err, res) => {
                 res.should.have.status(200)
                 res.body.process.should.be.equal(`tell('b)`)
-                res.body.constaints.should.be.equal(`'d`)
+                res.body.constraints.should.be.equal(`'d`)
                 done()
         })
     })
@@ -57,7 +57,7 @@ describe('Maude metaApply Test', () => {
             "'a, 'd",
             "lask 'd then tell ('b)"
         )
-        let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constaints} > `
+        let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constraints} > `
         chai.request(server)
             
             .get(`/maude/${entireConfig}/${config1.clickProcess}`)
@@ -65,7 +65,7 @@ describe('Maude metaApply Test', () => {
             .end( (err, res) => {
                 res.should.have.status(200)
                 res.body.process.should.be.equal(`tell('b)`)
-                res.body.constaints.should.be.equal(`'a`)
+                res.body.constraints.should.be.equal(`'a`)
                 done()
         })
     })

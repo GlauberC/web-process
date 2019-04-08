@@ -2,7 +2,7 @@ module.exports = (definitions, process, constraints, clickProcess = '') => {
     return {
         definitions: definitions,
         process: process,
-        constaints: constraints,
+        constraints: constraints,
         clickProcess: clickProcess,
     }
 }

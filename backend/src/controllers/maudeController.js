@@ -11,7 +11,7 @@ router.post( '/', async ( req, res ) => {
         const result = await maudeHelper.requestMaudeMetaRed(
             req.body.definitions,
             req.body.process,
-            req.body.constaints
+            req.body.constraints
         )  
         res.send( resultHelper.createModel( result ) )
     } catch( err ) {
@@ -24,7 +24,7 @@ router.post( '/parse', async ( req, res ) => {
         const result = await maudeHelper.requestMaudeParseMetaRed(
             req.body.definitions,
             req.body.process,
-            req.body.constaints
+            req.body.constraints
         )  
         if( resultHelper.isOk( result ).ok ){
             res.status( 200 ).send( 'ok' )

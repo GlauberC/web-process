@@ -28,7 +28,7 @@ describe('Maude metaRed Test', () => {
                 res.should.have.status(200)
                 res.body.definitions.should.be.equal("def('d1, tell('a))")
                 res.body.process.should.be.equal("tell('b), tell('c)")
-                res.body.constaints.should.be.equal("'d")
+                res.body.constraints.should.be.equal("'d")
                 done()
         })
     })

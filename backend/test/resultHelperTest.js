@@ -21,7 +21,7 @@ describe('resulHelper', () => {
         const functionResult = resulHelper.createModel(result)
         expect(functionResult.definitions).be.equal(model.definitions)
         expect(functionResult.process).be.equal(model.process)
-        expect(functionResult.constaints).be.equal(model.constaints)
+        expect(functionResult.constraints).be.equal(model.constraints)
         done()
     })
 

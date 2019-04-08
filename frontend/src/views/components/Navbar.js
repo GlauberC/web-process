@@ -15,7 +15,7 @@ export default class Tree extends Component {
                 <ul className="navbar-nav mr-auto">
 
                     <li className="nav-item {{activeConfigPage}}">
-                        <Link className="nav-link" to = "/">New Config</Link>
+                        <Link className="nav-link createConfig" to = "/configinit">New Config</Link>
                     </li>
 
                 </ul>

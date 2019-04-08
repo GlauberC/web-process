@@ -31,7 +31,7 @@ export default class ConfigInit extends Component{
                 this.input = {
                     definitions: args[0].trim(),
                     process: args[1].trim(),
-                    constaints: args[2].trim(),
+                    constraints: args[2].trim(),
                 }
                 resolve('')
             }
@@ -77,8 +77,8 @@ export default class ConfigInit extends Component{
             const response = await fetch('http://localhost:3001/maude', options)
             if(await response.status === 200){
                 response.json().then( (res) => {
-                    PubSub.publish('metaRed', res);
-                    return this.props.history.push('/tree')
+                    PubSub.publish('metaRed', res)
+                    return this.props.history.push('/')
                 })
             }else{
                 this.setState({error: " There was an internal error", success: ""})
