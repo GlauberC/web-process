@@ -53,4 +53,61 @@ describe('Maude metaRed Test', () => {
 
 })
 
+describe('Maude Parse metaRed Test', () => {
+
+    it('OK status 1', done => {
+
+        const config1 = configModel(
+            "def('d1, tell('a))",
+            "tell('b) || tell('c)",
+            "'d",
+            ""
+        )
+
+        chai.request(server)
+            .post('/maude/parse/')
+            .send(config1)
+            .end( (err, res) => {
+                res.should.have.status(200)
+                done()
+        })
+    })
+    it('OK status 2', done => {
+
+        const config2 = configModel(
+            "def('d1, tell('a))",
+            "lask 'a then tell('b)",
+            "'a",
+            ""
+        )
+
+        chai.request(server)
+            .post('/maude/parse/')
+            .send(config2)
+            .end( (err, res) => {
+                res.should.have.status(200)
+                done()
+        })
+    })
+
+    it('Error', done => {
+
+        const config2 = configModel(
+            "def('d1 tell('a))",
+            "tell('b) || tell(c)",
+            "'d",
+            ""
+        )
+
+        chai.request(server)
+            .post('/maude/parse/')
+            .send(config2)
+            .end( (err, res) => {
+                res.should.have.status(406)
+                done()
+        })
+    })
+
+})
+
 

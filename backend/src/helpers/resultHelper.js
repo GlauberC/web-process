@@ -11,4 +11,7 @@ module.exports = {
         )
         
     },
+    isOk : result => {
+        return {ok: /Maude>\sConfig:/i.test(result) ? true : false}
+    }
 }

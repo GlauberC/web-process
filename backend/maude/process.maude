@@ -153,3 +153,8 @@ red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'c then tell('e) + ask '
   *** call
 red metaRed( < def( 'd1, tell('a) ) ; call('d2) || tell('g) ; 'c > ) .
 red metaRed( < def( 'd1, tell('a) ) ; ( call('d2)  || tell('g))  || (call('d2) || tell('b')) ; 'c > ) . *** TROCOU A ORDEM
+
+
+
+*** Parse
+parse metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) ; 'a ; 'a >, 'tell, ( 'C:Constraint <- upTerm('c) ) ) .

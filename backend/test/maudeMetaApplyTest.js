@@ -12,7 +12,7 @@ describe('Maude metaApply Test', () => {
 
         let config1 = configModel(
             "def('d1, tell('a))",
-            "tell('b) || tell('c)",
+            "tell('a) || tell('c)",
             "'d",
             "tell('a)"
         )
@@ -23,7 +23,8 @@ describe('Maude metaApply Test', () => {
             .send(config1)
             .end( (err, res) => {
                 res.should.have.status(200)
-                res.body.code.should.be.equal(0)
+                res.body.process.should.be.equal(`tell('c)`)
+                res.body.constaints.should.be.equal(`'a, 'd`)
                 done()
         })
     })
@@ -43,54 +44,31 @@ describe('Maude metaApply Test', () => {
             .send(config1)
             .end( (err, res) => {
                 res.should.have.status(200)
-                res.body.code.should.be.equal(1)
+                res.body.process.should.be.equal(`tell('b)`)
+                res.body.constaints.should.be.equal(`'d`)
                 done()
         })
     })
-
     it('lask click', done => {
 
         let config1 = configModel(
             "def('d1, tell('a))",
             "lask 'd then tell ('b)",
-            "'d",
+            "'a, 'd",
             "lask 'd then tell ('b)"
         )
         let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constaints} > `
-
         chai.request(server)
             
             .get(`/maude/${entireConfig}/${config1.clickProcess}`)
             .send(config1)
             .end( (err, res) => {
                 res.should.have.status(200)
-                res.body.code.should.be.equal(1)
+                res.body.process.should.be.equal(`tell('b)`)
+                res.body.constaints.should.be.equal(`'a`)
                 done()
         })
     })
-
-    it('call click', done => {
-
-        let config1 = configModel(
-            "def('d1, tell('a))",
-            "tell('b) || call('d1)",
-            "'d",
-            "call('d1)"
-        )
-        let entireConfig = `< ${config1.definitions} ; ${config1.process} ; ${config1.constaints} > `
-        chai.request(server)
-            
-            .get(`/maude/${entireConfig}/${config1.clickProcess}`)
-            .send(config1)
-            .end( (err, res) => {
-                res.should.have.status(200)
-                res.body.code.should.be.equal(2)
-                done()
-        })
-    })
-
-    
-
 })
 
 
