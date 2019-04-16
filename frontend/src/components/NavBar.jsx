@@ -12,9 +12,6 @@ export default () => (
             <li className="nav-item">
                 <a className="nav-link" href='#/config'>Create config</a>
             </li>
-            <li className="nav-item">
-                <a className="nav-link" href = "#/tree">Tree</a>
-            </li>
             </ul>
         </div>
     </nav>

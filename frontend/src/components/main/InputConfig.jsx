@@ -21,9 +21,9 @@ export default props => {
             return undefined // Use in parse
         }
         return { // Use in parse
-            definitions: inputDPC[0],
-            process: inputDPC[1],
-            constraints: inputDPC[2]
+            definitions: inputDPC[0].trim().replace(/\n/, ''),
+            process: inputDPC[1].trim().replace(/\n/, ''),
+            constraints: inputDPC[2].trim().replace(/\n/, '')
         }
     }
     
@@ -70,6 +70,7 @@ export default props => {
                 response.json().then( (res) => {
                     pubSub.publish('metaRed', res)
                     setTimeout(() => {
+                        errorSuccessPublish('', '')
                         return props.history.push('/tree')
                     } , 500)
                 })

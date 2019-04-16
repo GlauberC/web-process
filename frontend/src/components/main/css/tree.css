@@ -1,0 +1,21 @@
+.node {
+    cursor: pointer;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+path.link{
+  stroke: blue;
+  opacity: 0.2;
+}
+
+.node text {
+  font: 15px sans-serif;
+}
+
+svg{
+  border-style: outset;
+}
