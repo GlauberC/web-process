@@ -1,0 +1,21 @@
+{{#if isConfigPage}}
+    <h1>TESTE</h1>
+{{/if}}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Process Simulator</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#conteudoNavbarSuportado" aria-controls="conteudoNavbarSuportado" aria-expanded="false" aria-label="Alterna navegação">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="conteudoNavbarSuportado">
+    <ul class="navbar-nav mr-auto">
+
+      <li class="nav-item {{activeConfigPage}}">
+        <a class="nav-link" href="/">Create config</a>
+      </li>
+      <li class="nav-item {{activeProcessPage}}">
+        <a class="nav-link" href="/process">Process edit</a>
+      </li>
+    </ul>
+  </div>
+</nav>

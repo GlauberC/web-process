@@ -91,7 +91,8 @@ export default class Tree extends Component{
     }
     handleNode = (event, nodeKey) => {
         let node = event.target.parentNode
-        node.setAttribute("data-tippy-content", `<a class="btn" onClick="test('${nodeKey}')">${nodeKey}</a>`)
+        let branch = this.findB(nodeKey, this.state.treeData)
+        node.setAttribute("data-tippy-content", `<a class="btn" onClick="test('${nodeKey}')">${branch.content}</a>`)
         tippy(node, {           
             trigger: 'click',
             interactive: true
