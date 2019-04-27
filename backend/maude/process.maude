@@ -1,4 +1,3 @@
-load mset.maude
 load constraint.maude
 
 mod PROCESS is
@@ -13,7 +12,7 @@ mod PROCESS is
 
   op ask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
   op lask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
-  op _+_ : AskProcess AskProcess -> AskProcess [comm assoc] .
+  op _+_ : AskProcess AskProcess -> AskProcess [assoc] .
   op zero : -> AskProcess [ctor] .
 
 
@@ -23,13 +22,13 @@ view Process from TRIV to PROCESS is
     sort Elt to Process .
 endv
 
-mod MSET-PROCESS is
-    protecting MSET{Process} .
+mod LIST-PROCESS is
+    protecting LIST{Process} .
 endm
 
 
 mod DEFINITION is
-  pr MSET-PROCESS .
+  pr LIST-PROCESS .
   sort Def .
 
   op def : Qid Process -> Def [ctor] .
@@ -52,31 +51,32 @@ mod CONFIG is
   pr SET-DEFINITION .
   sort Config .
 
-  op <_;_;_>  : Set{Def} Mset{Process} Set{Constraint} -> Config [ctor] .
+  op <_;_;_>  : Set{Def} List{Process} Set{Constraint} -> Config [ctor] .
 
 
-  var Lp : Mset{Process} .
+  vars Lp, Lp' : List{Process} .
   var Pa : AskProcess .
 
-  vars P P1 : Process .
-  vars c d   : Constraint .
+  vars P P' P1 : Process .
+  vars c c' d   : Constraint .
   var Lc : Set{Constraint} .
   var Ld : Set{Def} .
   var q : Qid .
 
 
-  rl [tell] : < Ld ; (Lp , tell(c)) ; Lc > => < Ld ; (Lp) ; (Lc, c) > .
+  rl [tell] : < Ld ; Lp tell(c) Lp' ; Lc > => < Ld ; Lp Lp' ; (Lc, c) > .
 
-  crl [askthen] : < Ld ;  (Lp , ask c then P) ; Lc > => < Ld ; (Lp, P)  ; Lc > if Lc |-- c .
-  crl [laskthen] : < Ld ;  (Lp , lask c then P) ; Lc > => < Ld ; (Lp, P)  ; minus(Lc, c) > if Lc |-- c .
+  crl [askthen] : < Ld ;  Lp (ask c then P) Lp' ; Lc > => < Ld ; Lp P Lp'  ; Lc > if Lc |-- c .
+  crl [laskthen] : < Ld ;  Lp (lask c then P) Lp' ; Lc > => < Ld ; Lp P Lp'  ; minus(Lc, c) > if Lc |-- c .
 
-  crl [sum] : < Ld ; Lp, ask c then P + Pa ; Lc > => < Ld ; Lp, P ; Lc > if Lc |-- c .
-  crl [lsum] : < Ld ; Lp, lask c then P + Pa ; Lc > => < Ld ; Lp, P ; minus(Lc, c) > if Lc |-- c .
+  crl [sum] : < Ld ; Lp (ask c then P) + Pa Lp' ; Lc > => < Ld ; Lp P Lp' ; Lc > if Lc |-- c .
 
-  rl [call] : < ( def(q, P) , Ld) ; (Lp , call(q)) ; Lc > => < ( def(q, P) , Ld)  ; (Lp, P) ; Lc > .
+  crl [lsum] : < Ld ; Lp, (lask c then P) + Pa Lp' ; Lc > => < Ld ; Lp P Lp' ; minus(Lc, c) > if Lc |-- c .
+
+  rl [call] : < ( def(q, P) , Ld) ; Lp call(q) Lp' ; Lc > => < ( def(q, P) , Ld)  ; Lp P Lp' ; Lc > .
 
 
-  eq < Ld ; (Lp, P || P1 ) ; Lc > = < Ld ; (Lp, P, P1) ; Lc > .
+  eq < Ld ; Lp P || P1 Lp' ; Lc > = < Ld ; Lp P P1 Lp' ; Lc > .
 
 
 
@@ -109,47 +109,52 @@ eof
 
 *** metaApp
   *** tell
-red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) ; 'a >, 'tell, ( 'C:Constraint <- upTerm('c) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) ; 'a >, 'tell, ( 'c:Constraint <- upTerm('c) ) ) .
 
   *** askthen
-red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'a >, 'askthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'b >, 'askthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) . *** proposital error
+red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'a >, 'askthen, ( 'c:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'b >, 'askthen, ( 'c:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) . *** proposital error
 
   *** laskthen
-red metaApp( < def( 'd1, tell('a) ) ; lask 'a then (tell('b)) ; 'a >, 'laskthen, ( 'C:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ; lask 'b then (tell('b)) ; 'a >, 'laskthen, ( 'C:Constraint <- upTerm('b) ; 'P:Process <- upTerm(tell('b)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; lask 'a then (tell('b)) ; 'a >, 'laskthen, ( 'c:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ; lask 'b then (tell('b)) ; 'a >, 'laskthen, ( 'c:Constraint <- upTerm('b) ; 'P:Process <- upTerm(tell('b)) ) ) .
 
   *** sum
-red metaApp( < def( 'd1, tell('a) ) ;  ask 'c then tell('e) + ask 'd then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'c then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'a then tell('f) ; 'c >, 'sum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'c then tell('e) + ask 'd then tell('f) ; 'c >, 'sum, ( 'c:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'c then tell('f) ; 'c >, 'sum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'a then tell('f) ; 'c >, 'sum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
 
   ***lsum
-red metaApp( < def( 'd1, tell('a) ) ;  lask 'c then tell('e) + lask 'd then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'c then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'a then tell('f) ; 'c >, 'lsum, ( 'C:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'c then tell('e) + lask 'd then tell('f) ; 'c >, 'lsum, ( 'c:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'c then tell('f) ; 'c >, 'lsum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'a then tell('f) ; 'c >, 'lsum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
 
   *** call
 red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('d1) ; 'b >, 'call, ( 'q:Qid <- upTerm('d1) ) ) .
 red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d2) ; 'b >, 'call, ( 'q:Qid <- upTerm('d2) ) ) .
-red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d1) || call('d2) ; 'b >, 'call, ( 'q:Qid <- upTerm('d2) ) ) . *** RESPOSTA NÃO ESPERADA
+red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d1) || call('d2) ; 'b >, 'call, ( 'q:Qid <- upTerm('d2) ) ) . 
 red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('f1) ; 'b >, 'call, ( 'q:Qid <- upTerm('f1) ) ) . *** proposital error
 
 
 *** metaRed
   *** tell
 red metaRed( < def( 'd1, tell('a) ) ; tell( 'c ) || tell('b )  ; 'a > ) .
-red metaRed( < def( 'd1, tell('a) ) ; tell( 'c ) || tell('b ) || tell('c)  ; 'a > ) . *** Warning de ambiguidade
+red metaRed( < def( 'd1, tell('a) ) ; tell( 'c ) || tell('b ) || tell('c)  ; 'a > ) . 
 
   *** askthen
-red metaRed( < def( 'd1, tell('a) ) ; ( ask 'a then (tell('b)) ) || tell('d) ; 'a > ) . *** TROCOU A ORDEM
+red metaRed( < def( 'd1, tell('a) ) ; ( ask 'a then (tell('b)) ) || tell('d) ; 'a > ) . 
 red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b)) ) ; 'a > ) .
-red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b) || tell('c)) ) ; 'a > ) . *** O parentesis dentro do then foi eliminado, não foi resolvido a operação askthen(P || P)
-red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b)) ) || tell('f) ; 'a > ) . *** TROCOU A ORDEM
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b) || tell('c)) ) ; 'a > ) . 
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'a then (tell('b)) ) || tell('f) ; 'a > ) . 
 
   *** sum
-red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'c then tell('e) + ask 'd then tell('f) ) || tell('g) ; 'c > ) . *** warning de ambiguidade
+red metaRed( < def( 'd1, tell('a) ) ; tell('d) || ( ask 'c then tell('e) + ask 'd then tell('f) ) || tell('g) ; 'c > ) . 
 
   *** call
 red metaRed( < def( 'd1, tell('a) ) ; call('d2) || tell('g) ; 'c > ) .
-red metaRed( < def( 'd1, tell('a) ) ; ( call('d2)  || tell('g))  || (call('d2) || tell('b')) ; 'c > ) . *** TROCOU A ORDEM
+red metaRed( < def( 'd1, tell('a) ) ; ( call('d2)  || tell('g))  || (call('d2) || tell('b')) ; 'c > ) .
+
+
+Ao tirar a comutatividade, os seguintes exemplos pararam de funcionar:
+red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'c then tell('f) ; 'c >, 'sum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
+red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'c then tell('f) ; 'c >, 'lsum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
