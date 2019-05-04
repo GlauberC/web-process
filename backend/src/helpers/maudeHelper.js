@@ -19,6 +19,17 @@ module.exports = {
         const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
         return result
     },
+    requestMaudeGetRedex : function (def, process, constraints){
+        const config = `< ${def} ; ${process} ; ${constraints} >`
+        const func = `getRedex`
+        let command = `${func}(${config})`
+        command = command.replace(/\n/ig, "")
+        command = shellescape(command.split(' '))
+
+        
+        const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
+        return result
+    },
     requestMaudeMetaAppTell: function (config, tellArg){
 
         const subs = `( 'C:Constraint  <- upTerm( ${tellArg} ) )`

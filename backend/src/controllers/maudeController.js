@@ -8,12 +8,19 @@ const processHelper = require('../helpers/processHelper')
 
 router.post( '/', async ( req, res ) => {
     try{
-        const result = await maudeHelper.requestMaudeMetaRed(
+        const resultMetaRed = await maudeHelper.requestMaudeMetaRed(
             req.body.definitions,
             req.body.process,
             req.body.constraints
-        )  
-        res.send( resultHelper.createModel( result ) )
+        ) 
+        const configuration = resultHelper.createModel( resultMetaRed )
+        const resultGetRedex = await maudeHelper.requestMaudeGetRedex(
+            configuration.definitions,
+            configuration.process,
+            configuration.constraints
+        )
+        configuration.clickableProcess = resultHelper.getRedex(resultGetRedex) 
+        res.send( configuration )
     } catch( err ) {
         return res.status( 406 ).send( err )
     }
