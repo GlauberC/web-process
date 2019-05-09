@@ -23,7 +23,7 @@ view Process from TRIV to PROCESS is
 endv
 
 mod LIST-PROCESS is
-    protecting LIST{Process} .
+    protecting LIST{Process} * (op __ to _,_) .
 endm
 
 
@@ -152,6 +152,17 @@ mod META-CONFIG is
     var q : Qid .
     vars LA LA' : AskProcess .
     vars Lp Lp' : List{Process} .
+
+    op getProcess : Config Nat OptNat -> Process .
+    eq getProcess(< Ld ; Lp ; Lc >, n, on ) = getProcess(Lp, n, on) .
+    op getProcess : List{Process} Nat OptNat -> Process .
+    eq getProcess(nil, n , on) = skip .
+    eq getProcess( (P Lp), 0, None) = P .
+    eq getProcess( (P Lp), 0, n) = getProcessAsk(P, n) .
+    eq getProcess( (P Lp), s(n), on) = getProcess(Lp, n , on) .
+    op getProcessAsk : AskProcess Nat -> AskProcess .
+    eq getProcessAsk( ((ask c then P) + LA) , 0) = (ask c then P) .
+    eq getProcessAsk( ((ask c then P) + LA) , s(n)) = getProcessAsk(LA, n) .
     
 
     --- =============================================
@@ -201,6 +212,7 @@ red metaApp( < def( 'd1, tell('a) ) ; (ask 'a then (tell('xx) || tell('yy))) || 
     
 
 
+red getProcess( ( < def('def , tell('x)) ; tell('a) tell('b) ; 'b > ), 0, None ) .
 
 
     
