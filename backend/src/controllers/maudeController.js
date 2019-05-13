@@ -3,6 +3,7 @@ const router = express.Router()
 const maudeHelper = require('../helpers/maudeHelper')
 const resultHelper = require('../helpers/resultHelper')
 const processHelper = require('../helpers/processHelper')
+const configVisunHelper = require('../helpers/configVisualizationHelper')
 
 
 
@@ -19,7 +20,15 @@ router.post( '/', async ( req, res ) => {
             configuration.process,
             configuration.constraints
         )
-        configuration.clickableProcess = resultHelper.getRedex(resultGetRedex) 
+        const redex = resultHelper.getRedex(resultGetRedex) 
+        configuration.configVisualization = configVisunHelper.getConfigVisualization(
+            configuration.process,
+            configuration.constraints,
+            redex
+        )
+        redex.map((p) => {
+            configuration.clickableProcessIndex.push(p.ir)
+        })
         res.send( configuration )
     } catch( err ) {
         return res.status( 406 ).send( err )

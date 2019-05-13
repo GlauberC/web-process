@@ -131,21 +131,21 @@ describe('# resulHelper getRedex', () => {
         done()
     })
 
-    it(`* getRedex  < def('d1, tell('a)) ; (ask 'd then tell('c)) + (lask 'a then tell('g)) ; 'd >`, done => {
-        let clickableProcessResult = 
-        [ 
-          { ir: '0, 0',
-            config: `Vai dar algo aqui` },
+    // it(`* getRedex  < def('d1, tell('a)) ; (ask 'd then tell('c)) + (lask 'a then tell('g)) ; 'd >`, done => {
+    //     let clickableProcessResult = 
+    //     [ 
+    //       { ir: '0, 0',
+    //         config: `Vai dar algo aqui` },
  
-        ] 
+    //     ] 
             
-        const functionResult = resulHelper.getRedex(resultGetRedex3)
+    //     const functionResult = resulHelper.getRedex(resultGetRedex3)
         
-        // expect(functionResult[0].ir).be.equal(clickableProcessResult[0].ir)
-        // expect(functionResult[0].config).be.equal(clickableProcessResult[0].config)
+    //     expect(functionResult[0].ir).be.equal(clickableProcessResult[0].ir)
+    //     expect(functionResult[0].config).be.equal(clickableProcessResult[0].config)
 
-        done()
-    })
+    //     done()
+    // })
 
     
 
