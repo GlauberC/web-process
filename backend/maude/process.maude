@@ -23,7 +23,7 @@ view Process from TRIV to PROCESS is
 endv
 
 mod LIST-PROCESS is
-    protecting LIST{Process} * (op __ to _,_) .
+    protecting LIST{Process} * (op __ to _&&_) .
 endm
 
 
@@ -68,21 +68,21 @@ mod CONFIG is
     
 
 
-    rl [tell] : < Ld ; Lp tell(c) Lp' ; Lc > => < Ld ; Lp Lp' ; (Lc, c) > .
+    rl [tell] : < Ld ; (Lp && tell(c) && Lp') ; Lc > => < Ld ; (Lp && Lp') ; (Lc, c) > .
 
-    --- crl [askthen] : < Ld ;  Lp (ask c then P) Lp' ; Lc > => < Ld ; Lp P Lp'  ; Lc > if Lc |-- c .
-    --- crl [laskthen] : < Ld ;  Lp (lask c then P) Lp' ; Lc > => < Ld ; Lp P Lp'  ; minus(Lc, c) > if Lc |-- c .
+    --- crl [askthen] : < Ld ;  Lp && (ask c then P) && Lp' ; Lc > => < Ld ; Lp && P && Lp'  ; Lc > if Lc |-- c .
+    --- crl [laskthen] : < Ld ;  Lp && (lask c then P) && Lp' ; Lc > => < Ld ; Lp && P && Lp'  ; minus(Lc, c) > if Lc |-- c .
 
-    crl [sum] : < Ld ; Lp (LA + (ask c then P) + LA') Lp' ; Lc > => < Ld ; Lp P Lp' ; Lc > if Lc |-- c .
+    crl [sum] : < Ld ; Lp && (LA + (ask c then P) + LA') && Lp' ; Lc > => < Ld ; Lp && P && Lp' ; Lc > if Lc |-- c .
 
-    crl [lsum] : < Ld ; Lp, (LA + (lask c then P) + LA')  Lp' ; Lc > => < Ld ; Lp P Lp' ; minus(Lc, c) > if Lc |-- c .
+    crl [lsum] : < Ld ; Lp && (LA + (lask c then P) + LA') && Lp' ; Lc > => < Ld ; Lp && P && Lp' ; minus(Lc, c) > if Lc |-- c .
 
-    rl [call] : < ( def(q, P) , Ld) ; Lp call(q) Lp' ; Lc > => < ( def(q, P) , Ld)  ; Lp P Lp' ; Lc > .
+    rl [call] : < ( def(q, P) , Ld) ; Lp && call(q) && Lp' ; Lc > => < ( def(q, P) , Ld)  ; Lp && P && Lp' ; Lc > .
 
 
-    eq < Ld ; P || P1 ; Lc > = < Ld ;  P P1 ; Lc > .
-    eq < Ld ; Lp (P || P1) ; Lc > = < Ld ; Lp P P1 ; Lc > .
-    eq < Ld ; Lp (P || P1) Lp' ; Lc > = < Ld ; Lp P P1 Lp' ; Lc > .
+    eq < Ld ; P || P1 ; Lc > = < Ld ;  P && P1 ; Lc > .
+    eq < Ld ; Lp && (P || P1) ; Lc > = < Ld ; Lp && P && P1 ; Lc > .
+    eq < Ld ; Lp && (P || P1) && Lp' ; Lc > = < Ld ; Lp && P && P1 && Lp' ; Lc > .
 
 
 
@@ -157,9 +157,9 @@ mod META-CONFIG is
     eq getProcess(< Ld ; Lp ; Lc >, n, on ) = getProcess(Lp, n, on) .
     op getProcess : List{Process} Nat OptNat -> Process .
     eq getProcess(nil, n , on) = skip .
-    eq getProcess( (P Lp), 0, None) = P .
-    eq getProcess( (P Lp), 0, n) = getProcessAsk(P, n) .
-    eq getProcess( (P Lp), s(n), on) = getProcess(Lp, n , on) .
+    eq getProcess( (P && Lp), 0, None) = P .
+    eq getProcess( (P && Lp), 0, n) = getProcessAsk(P, n) .
+    eq getProcess( (P && Lp), s(n), on) = getProcess(Lp, n , on) .
     op getProcessAsk : AskProcess Nat -> AskProcess .
     eq getProcessAsk( ((ask c then P) + LA) , 0) = (ask c then P) .
     eq getProcessAsk( ((ask c then P) + LA) , s(n)) = getProcessAsk(LA, n) .
@@ -176,7 +176,7 @@ mod META-CONFIG is
     --- Version on List of processes
     op getRedex : List{Process} Set{Constraint} Nat -> LInfoRed .
     eq getRedex(nil, Lc, n) = nil .
-    eq getRedex((P Lp), Lc, n) = getRedex$(P, Lp, Lc, n, None) ;; getRedex(Lp, Lc, n + 1) .
+    eq getRedex((P && Lp), Lc, n) = getRedex$(P, Lp, Lc, n, None) ;; getRedex(Lp, Lc, n + 1) .
     --- Version on processes
     op getRedex$ : Process List{Process} Set{Constraint} Nat OptNat -> LInfoRed .
     --- Note that the substitutions includes the List of "remaining
@@ -194,6 +194,7 @@ mod META-CONFIG is
 	  else nil fi )
 	;; getRedex$( LA, Lp, Lc, n, next(on)) .
 endm
+
 
 eof
 
