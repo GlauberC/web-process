@@ -1,1 +1,0 @@
-MAUDE_DIR = "/usr/bin/maude" npm start
