@@ -20,14 +20,14 @@ router.post( '/', async ( req, res ) => {
             configuration.process,
             configuration.constraints
         )
-        const redex = resultHelper.getRedex(resultGetRedex) 
+        const redex = resultHelper.getRedex( resultGetRedex ) 
         configuration.configVisualization = configVisunHelper.getConfigVisualization(
             configuration.process,
             configuration.constraints,
             redex
         )
         redex.map((p) => {
-            configuration.clickableProcessIndex.push(p.ir)
+            configuration.clickableProcessIndex.push( p.ir )
         })
         res.send( configuration )
     } catch( err ) {
@@ -54,38 +54,46 @@ router.post( '/parse', async ( req, res ) => {
 
 })
 
-router.get( '/:config/:process', async ( req, res ) => {
-    // 0 -> tell  // 1 -> ask or lask // 2 -> call // 404 -> error
-    const codeProcess = processHelper.selectProcess( req.params.process )
-    let result
+router.get( '/:config/:index', async ( req, res ) => {
+     try{
+        configurationSplit = req.params.config.split(';')
 
-    if( codeProcess == 0 ){
-        try {
-            const argTell = processHelper.getArg( req.params.process , codeProcess ).tell
-            result = maudeHelper.requestMaudeMetaAppTell( req.params.config, argTell )
-            res.send( resultHelper.createModel( result ) )
-        } catch(err) {
-            return res.status( 406 ).send( err )
-        }
-    }else if( codeProcess == 1 ){
-        try {
-            const args = processHelper.getArg( req.params.process , codeProcess )
-            result = maudeHelper.requestMaudeMetaAppAsk( req.params.config, args.ask, args.then )
-            res.send( resultHelper.createModel( result ) )
-        } catch(err) {
-            return res.status( 406 ).send( err )
-        }
-    }else if( codeProcess == 2 ){
-        try {
-            const args = processHelper.getArg( req.params.process , codeProcess )
-            result = maudeHelper.requestMaudeMetaAppLask( req.params.config, args.lask, args.then )
-            res.send( resultHelper.createModel( result ) )
-        } catch(err) {
-            return res.status( 406 ).send( err )
-        }
-    }
-    
+        const resultCompareRedex = await maudeHelper.requestMaudeGetRedex(
+            configurationSplit[0],
+            configurationSplit[1],
+            configurationSplit[2]
+        )
 
+        const compareRedex = resultHelper.getRedex( resultCompareRedex )
+        let subs = ''
+        compareRedex.map(p => {
+            if( p.ir === req.params.index ){
+                subs = p.processSubs
+            }
+        })
+
+        const resultMetaApp = maudeHelper.requestMaudeMetaApp( req.params.config, subs )
+        const configuration = resultHelper.createModel( resultMetaApp )
+
+        const resultGetRedex = await maudeHelper.requestMaudeGetRedex(
+            configuration.definitions,
+            configuration.process,
+            configuration.constraints
+        )
+        const redex = resultHelper.getRedex( resultGetRedex ) 
+        configuration.configVisualization = configVisunHelper.getConfigVisualization(
+            configuration.process,
+            configuration.constraints,
+            redex
+        )
+        redex.map((p) => {
+            configuration.clickableProcessIndex.push( p.ir )
+        })
+        res.send( configuration )
+
+     } catch( err ){
+        return res.status( 406 ).send( err )
+     }
 })
 
 module.exports = app => app.use( '/maude', router )

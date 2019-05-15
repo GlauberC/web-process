@@ -19,6 +19,15 @@ module.exports = {
         const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
         return result
     },
+    requestMaudeParseMetaRed: function (def, process, constraints){
+
+        const config = `< ${def} ; ${process} ; ${constraints} >`
+        const func = `metaRed`
+        let command = `${func}(${config})`
+        command = command.replace(/\n/ig, "")
+        command = shellescape(command.split(' '))
+        return shell.exec(`timeout 30 sh -c "echo parse ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
+    },
     requestMaudeGetRedex : function (def, process, constraints){
         const config = `< ${def} ; ${process} ; ${constraints} >`
         const func = `getRedex`
@@ -30,45 +39,16 @@ module.exports = {
         const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
         return result
     },
-    requestMaudeMetaAppTell: function (config, tellArg){
-
-        const subs = `( 'C:Constraint  <- upTerm( ${tellArg} ) )`
+    requestMaudeMetaApp : function (config, subs){
+        config = `< ${config} >`
         const func = `metaApp`
-        let command = `${func}( ( ${config} ) , 'tell, ${subs} )`
+        let command = `${func}( ${config} , ${subs} )`
         command = command.replace(/\n/ig, "")
-        command = shellescape(command.split(' '))
+        command = shellescape(command.split(' ')).replace(/\`/ig, "\\`")
+        // return command
         
-        return result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
-
-    },
-    requestMaudeMetaAppAsk: function(config, askArg, thenArg){
-        const subs = `'C:Constraint <- upTerm( ${askArg} ) ; 'P:Process <- upTerm( ${thenArg})`
-        const func = `metaApp`
-        let command = `${func}( ${config} , 'askthen, (${subs}) )`
-        command = command.replace(/\n/ig, "")
-        command = shellescape(command.split(' '))
-        
-        var result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
+        const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
         return result
-    },
-    requestMaudeMetaAppLask: function(config, askArg, thenArg){
-        const subs = `'C:Constraint <- upTerm( ${askArg} ) ; 'P:Process <- upTerm( ${thenArg})`
-        const func = `metaApp`
-        let command = `${func}( ${config} , 'laskthen, (${subs}) )`
-        command = command.replace(/\n/ig, "")
-        command = shellescape(command.split(' '))
-        
-        var result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
-        return result
-    },
-    requestMaudeParseMetaRed: function (def, process, constraints){
-
-        const config = `< ${def} ; ${process} ; ${constraints} >`
-        const func = `metaRed`
-        let command = `${func}(${config})`
-        command = command.replace(/\n/ig, "")
-        command = shellescape(command.split(' '))
-        return shell.exec(`timeout 30 sh -c "echo parse ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
     }
     
 }

@@ -16,15 +16,15 @@ module.exports = {
         let separated = splitedResultOneLine.split(';;')
         let clickableProcess = []
         separated.map( process => {
-            let newProcess = {ir: '', config: ''}
+            let newProcess = {ir: '', processSubs: ''}
             if(process.match(/ir\(\d,\s*None/ig)){
                 let separateProcess = /ir\((\d,\s*None),\s*(.+)/ig.exec(process)
                 newProcess.ir = separateProcess[1]
-                newProcess.config = separateProcess[2]
+                newProcess.processSubs = separateProcess[2].replace(/\)\s*$/ig, '')
             }else{
                 let separateProcess = /ir\((\d,\s*\d+),\s*(.+)/ig.exec(process)
                 newProcess.ir = separateProcess[1]
-                newProcess.config = separateProcess[2]
+                newProcess.processSubs = separateProcess[2].replace(/\)\s*$/ig, '')
             }
             
             clickableProcess.push(newProcess)

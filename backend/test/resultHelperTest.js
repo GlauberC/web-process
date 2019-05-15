@@ -99,9 +99,9 @@ describe('# resulHelper getRedex', () => {
         let clickableProcessResult = 
         [ 
           { ir: '0, None',
-            config: '\'tell, \'Lp\':List`{Process`} <- \'tell[\'\'c.Sort] ; \'c:Constraint <- \'\'b.Sort) ' },
+            processSubs: '\'tell, \'Lp\':List`{Process`} <- \'tell[\'\'c.Sort] ; \'c:Constraint <- \'\'b.Sort' },
           { ir: '1, None',
-            config: '\'tell, \'Lp\':List`{Process`} <- \'nil.List`{Process`} ; \'c:Constraint <- \'\'c.Sort)' } 
+            processSubs: '\'tell, \'Lp\':List`{Process`} <- \'nil.List`{Process`} ; \'c:Constraint <- \'\'c.Sort' } 
         ] 
             
         const functionResult = resulHelper.getRedex(resultGetRedex)
@@ -109,8 +109,8 @@ describe('# resulHelper getRedex', () => {
         expect(functionResult[0].ir).be.equal(clickableProcessResult[0].ir)
         expect(functionResult[1].ir).be.equal(clickableProcessResult[1].ir)
 
-        expect(functionResult[0].config).be.equal(clickableProcessResult[0].config)
-        expect(functionResult[1].config).be.equal(clickableProcessResult[1].config)
+        expect(functionResult[0].processSubs).be.equal(clickableProcessResult[0].processSubs)
+        expect(functionResult[1].processSubs).be.equal(clickableProcessResult[1].processSubs)
 
         done()
     })
@@ -119,14 +119,14 @@ describe('# resulHelper getRedex', () => {
         let clickableProcessResult = 
         [ 
           { ir: '0, None',
-            config: `'tell, 'Lp':List\`{Process\`} <- 'ask_then_[''f.Sort C ('tell[''a.Sort])] ; 'c:Constraint <- ''b.Sort)` },
+          processSubs: `'tell, 'Lp':List\`{Process\`} <- 'ask_then_[''f.Sort C ('tell[''a.Sort])] ; 'c:Constraint <- ''b.Sort` },
  
         ] 
             
         const functionResult = resulHelper.getRedex(resultGetRedex2)
         
         expect(functionResult[0].ir).be.equal(clickableProcessResult[0].ir)
-        expect(functionResult[0].config).be.equal(clickableProcessResult[0].config)
+        expect(functionResult[0].processSubs).be.equal(clickableProcessResult[0].processSubs)
 
         done()
     })
@@ -135,14 +135,14 @@ describe('# resulHelper getRedex', () => {
     //     let clickableProcessResult = 
     //     [ 
     //       { ir: '0, 0',
-    //         config: `Vai dar algo aqui` },
+    //         processSubs: `Vai dar algo aqui` },
  
     //     ] 
             
     //     const functionResult = resulHelper.getRedex(resultGetRedex3)
         
     //     expect(functionResult[0].ir).be.equal(clickableProcessResult[0].ir)
-    //     expect(functionResult[0].config).be.equal(clickableProcessResult[0].config)
+    //     expect(functionResult[0].processSubs).be.equal(clickableProcessResult[0].processSubs)
 
     //     done()
     // })

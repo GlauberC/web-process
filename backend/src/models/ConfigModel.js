@@ -1,10 +1,9 @@
-module.exports = (definitions, process, constraints, selectProcess = '') => {
+module.exports = (definitions, process, constraints,) => {
     return {
         definitions: definitions,
         process: process,
         constraints: constraints,
         configVisualization: '',
-        clickableProcessIndex: [],
-        selectProcess: selectProcess,
+        clickableProcessIndex: []
     }
 }
