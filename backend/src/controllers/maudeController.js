@@ -22,6 +22,7 @@ router.post( '/', async ( req, res ) => {
         )
         const redex = resultHelper.getRedex( resultGetRedex ) 
         configuration.configVisualization = configVisunHelper.getConfigVisualization(
+            configuration.definitions,
             configuration.process,
             configuration.constraints,
             redex
@@ -82,6 +83,7 @@ router.get( '/:config/:index', async ( req, res ) => {
         )
         const redex = resultHelper.getRedex( resultGetRedex ) 
         configuration.configVisualization = configVisunHelper.getConfigVisualization(
+            configuration.definitions,
             configuration.process,
             configuration.constraints,
             redex

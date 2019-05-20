@@ -19,6 +19,15 @@ module.exports = {
         const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
         return result
     },
+    requestMaudeGetProcess: function(config, index0, index1){
+        const func = `getProcess`
+        let command = `${func}(${config}, ${index0} , ${index1})`
+        command = command.replace(/\n/ig, "")
+        command = shellescape(command.split(' '))
+
+        const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
+        return result
+    },
     requestMaudeParseMetaRed: function (def, process, constraints){
 
         const config = `< ${def} ; ${process} ; ${constraints} >`

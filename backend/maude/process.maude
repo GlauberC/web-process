@@ -213,7 +213,7 @@ red metaApp( < def( 'd1, tell('a) ) ; (ask 'a then (tell('xx) || tell('yy))) || 
     
 
 
-red getProcess( ( < def('def , tell('x)) ; tell('a) tell('b) ; 'b > ), 0, None ) .
+red getProcess( ( < def('def , tell('x)) ; tell('a) && tell('b) ; 'b > ), 0, None ) .
 
 
     

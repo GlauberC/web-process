@@ -1,49 +1,43 @@
+const maudeHelper = require('../helpers/maudeHelper')
+const resultHelper = require('../helpers/resultHelper')
 module.exports = {
-    getConfigVisualization: (process, constraints, redex) => {
+    getConfigVisualization: (def, process, constraints, redex) => {
+        let config = `< ${def} ; ${process} ; ${constraints}  >`
         let processSplit = process.split('&&')
         let vizualizationProcess = []
+        var ir = ''
         processSplit.forEach((p, index) => {
             if(!p.match(/^\s*\(*\s*l*ask/ig)){
                 // there is no ask or lask
-                var ir = index + ', None'
+                ir = index + ', None'
             }else{
-                var sumSplit = p.split('+')
-                if(sumSplit.length === 1){
-                    // There is a ask or lask
-                    var ir = index + ', 0'
-                }else{
-                    // There is a sum of asks or lasks 
-                    var askProcess = []
-                    sumSplit.forEach((pa, indexA)=> {
-                        if(indexA === 0){
-                            // remove first (
-                            pa = pa.replace('\(', '')
-                        }else if(indexA === sumSplit.length - 1){
-                            // remove end )
-                            pa = pa.replace(/\)\s*$/ig, '')
-                        }
-                        var ir = index + ', '+ indexA
-                        redex.map((r) => {
-                            if(r.ir == ir){
-                                pa = 'c**' + pa.trim() + '**c'
-                            }
-                        })
-                        askProcess.push(pa)
-                    })
-                    vizualizationProcess.push('(' + askProcess.join(' + ') + ')')
-                    // jump next search
-                    ir = ''
-                }
+                redex.map(r => {
+                    let rSplit = r.ir.split(',')
+                    if(index === Number(rSplit[0])){
+                        let resultGetProcess = maudeHelper.requestMaudeGetProcess(config, rSplit[0], rSplit[1])
+                        let getProcess = resultHelper.getProcess(resultGetProcess).trim()
+                        p = p.replace(getProcess, `c**${getProcess}**c`)
+                        ir = ''
+                    }
+                })
             }
             if (ir !== ''){
-                redex.map((r) => {
-                    if(r.ir == ir){
+                console.log("AAAAAAAAAAAAAAAAAAAAAAAa ")
+                console.log(redex)
+                redex.map((r2) => {
+                    
+                    if(r2.ir == ir){
                         p = 'c**' + p.trim() + '**c'
                     }
                 })
                 vizualizationProcess.push(p)
+                
+            }else{
+                vizualizationProcess.push(p)
             }
         })
+        
+        console.log(vizualizationProcess.join(' && ') + ' ; ' + constraints)
         return vizualizationProcess.join(' && ') + ' ; ' + constraints
     }
 }

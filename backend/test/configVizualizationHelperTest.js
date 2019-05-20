@@ -6,6 +6,7 @@ const expect = chai.expect
 describe('Config Visualization', () => {
 
     it(`Config Visualization helper: only Tells`, done => {
+        let def = "def('d1, tell('a))"
         let process = "tell('b) && tell('c)"
         let constraints = "'d"
         let redex = 
@@ -20,13 +21,14 @@ describe('Config Visualization', () => {
             }
         ]
         let configResult = "c**tell('b)**c && c**tell('c)**c ; 'd"
-        const functionResult = configVisuHelper.getConfigVisualization(process, constraints, redex)
+        const functionResult = configVisuHelper.getConfigVisualization(def, process, constraints, redex)
         expect(functionResult).be.equal(configResult)
 
         done()
     })
 
     it(`Config Visualization helper:  Tell and Ask`, done => {
+      let def = "def('d1, tell('a))"
       let process = "tell('b) && (ask 'd then tell('c))"
       let constraints = "'d"
       let redex = 
@@ -40,8 +42,9 @@ describe('Config Visualization', () => {
           "config": "'sum, 'LA':AskProcess <- 'zero.AskProcess ; 'Lp':List`{Process`} <- 'nil.List`{Process`} ; 'P:Process <- 'tell[''c.Sort] ; 'c:Constraint <- ''d.Sort"
         }
       ]
-      let configResult = "c**tell('b)**c && c**(ask 'd then tell('c))**c ; 'd"
-      const functionResult = configVisuHelper.getConfigVisualization(process, constraints, redex)
+      let configResult = "c**tell('b)**c &&  (c**ask 'd then tell('c)**c) ; 'd"
+      
+      const functionResult = configVisuHelper.getConfigVisualization(def, process, constraints, redex)
       expect(functionResult).be.equal(configResult)
 
       done()
@@ -49,6 +52,7 @@ describe('Config Visualization', () => {
     })
 
     it(`Config Visualization helper:  Tell and many Asks`, done => {
+      let def = "def('d1, tell('a))"
       let process = "tell('b) && ask 'd then tell('c) && ask 'a then tell('g) && ask 'd then tell('h)"
       let constraints = "'d"
       let redex = 
@@ -66,8 +70,8 @@ describe('Config Visualization', () => {
           "config": "'sum, 'LA':AskProcess <- 'zero.AskProcess ; 'Lp':List`{Process`} <- 'nil.List`{Process`} ; 'P:Process <- 'tell[''h.Sort] ; 'c:Constraint <- ''d.Sort"
         }
       ]
-      let configResult = "c**tell('b)**c && c**ask 'd then tell('c)**c &&  ask 'a then tell('g)  && c**ask 'd then tell('h)**c ; 'd"
-      const functionResult = configVisuHelper.getConfigVisualization(process, constraints, redex)
+      let configResult = "c**tell('b)**c &&  c**ask 'd then tell('c)**c  &&  ask 'a then tell('g)  &&  c**ask 'd then tell('h)**c ; 'd"
+      const functionResult = configVisuHelper.getConfigVisualization(def, process, constraints, redex)
       expect(functionResult).be.equal(configResult)
 
       done()
@@ -75,6 +79,7 @@ describe('Config Visualization', () => {
     })
 
     it(`Config Visualization helper:  sum`, done => {
+      let def = "def('d1, tell('a))"
       let process = "(ask 'd then tell('c) + ask 'a then tell( 'g) + ask 'd then tell('h)) && tell('a)"
       let constraints = "'d"
       let redex = 
@@ -92,8 +97,8 @@ describe('Config Visualization', () => {
           "config": "'tell, 'Lp':List`{Process`} <- 'nil.List`{Process`} ; 'c:Constraint <- ''a.Sort"
         }
       ]
-      let configResult = "(c**ask 'd then tell('c)**c +  ask 'a then tell( 'g)  + c**ask 'd then tell('h)**c) && c**tell('a)**c ; 'd"
-      const functionResult = configVisuHelper.getConfigVisualization(process, constraints, redex)
+      let configResult = "(c**ask 'd then tell('c)**c + ask 'a then tell( 'g) + c**ask 'd then tell('h)**c)  && c**tell('a)**c ; 'd"
+      const functionResult = configVisuHelper.getConfigVisualization(def, process, constraints, redex)
       expect(functionResult).be.equal(configResult)
 
       done()

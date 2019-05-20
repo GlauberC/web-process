@@ -34,7 +34,11 @@ module.exports = {
         
 
     },
-
+    getProcess : result => {
+        let resultOneLine = /result.+:(.+)/.exec(result.replace(/\n/ig, '').replace(/\t/ig, ''))
+        let splitedResultOneLine = resultOneLine[1].replace('Maude> Bye.', '')
+        return splitedResultOneLine
+    },
     isOk : result => {
         return {ok: /Maude>\sConfig:/i.test(result) ? true : false}
     }
