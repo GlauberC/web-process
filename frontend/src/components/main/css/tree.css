@@ -19,3 +19,7 @@ path.link{
 svg{
   border-style: outset;
 }
+.process-clickable{
+  cursor: pointer;
+  
+}

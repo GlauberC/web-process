@@ -9,18 +9,24 @@ export default class Tree extends Component{
     constructor(props){
         super()
         this.props = props
-        this.name = `< ${this.props.initialConfig.definitions} ; ${this.props.initialConfig.process} ; ${this.props.initialConfig.constraints} >`
+        this.config = `${this.props.initialConfig.definitions} ; ${this.props.initialConfig.process} ; ${this.props.initialConfig.constraints}`
         this.state = {
             run: 0,
-            treeData: this.branchFactory('x', this.name, '0')
+            treeData: this.branchFactory('x',
+                this.config,
+                this.props.initialConfig.configVisualization,
+                this.props.initialConfig.clickableProcessIndex,
+                '0')
         }    
     }
 
-    branchFactory = (parent,  content, name = '') => {
+    branchFactory = (parent, config, content, clickableProcessIndex, name = '') => {
         let newObj = {
             name: name,
             parent: parent,
             content: content,
+            config: config,
+            clickableProcessIndex: clickableProcessIndex,
             children: []
         }
         return newObj
@@ -47,7 +53,7 @@ export default class Tree extends Component{
             parentBranch.children.push(branch)
             return tree
         }else{
-            if(parentBranch.children.filter(b => branch.content === b.content).length > 0){
+            if(parentBranch.children.filter(b => branch.config === b.config).length > 0){
                 return tree
             }else{
                 branch.name = parentBranch.name + '.' + parentBranch.children.length
@@ -92,15 +98,29 @@ export default class Tree extends Component{
     handleNode = (event, nodeKey) => {
         let node = event.target.parentNode
         let branch = this.findB(nodeKey, this.state.treeData)
-        node.setAttribute("data-tippy-content", `<a class="btn" onClick="test('${nodeKey}')">${branch.content}</a>`)
+        // node.setAttribute("data-tippy-content", `<a class="btn" onClick="test('${nodeKey}')">${branch.content}</a>`)
+        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = test(__;; >").replace(/\*\*c/ig,"</a>")
+        // console.log(branch.clickableProcessIndex[1])
+        let arrShowConfig = []
+        showConfig.split(';;').forEach((p, index)=> {
+            arrShowConfig.push(p.replace('__', nodeKey + ',' + index))
+        })
+        showConfig = arrShowConfig.join(')')
+        node.setAttribute("data-tippy-content", `${showConfig}`)
         tippy(node, {           
             trigger: 'click',
             interactive: true
         })
     }
     inputHandle = (e) => {
-        console.log(e.target.value)
-        console.log(this.findB(e.target.value, this.state.treeData))
+        let targetArr = e.target.value.split('__')
+        let targetName = targetArr[0]
+        let indexClickable = targetArr[1]
+
+        console.log(targetName)
+        console.log(indexClickable)
+        console.log(this.findB(targetName, this.state.treeData))
+        console.log(this.findB(targetName, this.state.treeData).clickableProcessIndex[indexClickable])
     }
 
     render(){

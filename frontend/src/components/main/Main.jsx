@@ -31,7 +31,11 @@ export default class Main extends Component{
             this.setState({successMsg: successMsg})
         })
         pubSub.subscribe('metaRed', (err, res) => {	
-            this.setState({initialConfig: {definitions: res.definitions, process: res.process, constraints: res.constraints}})
+            this.setState({initialConfig: {definitions: res.definitions,
+                process: res.process,
+                constraints: res.constraints,
+                configVisualization: res.configVisualization,
+                clickableProcessIndex: res.clickableProcessIndex}})
         })
     }
 

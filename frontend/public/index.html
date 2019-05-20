@@ -55,10 +55,10 @@
     -->
     <script>
       
-      function test(key='default'){
+      function test(key, n){
           var testInput = document.querySelector('.testInput')
           testInput.classList.remove('invisible')
-          testInput.value = key
+          testInput.value = key + '__' + n
           testInput.select()
           testInput.classList.add('invisible')
       }
