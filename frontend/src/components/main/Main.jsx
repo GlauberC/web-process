@@ -2,9 +2,11 @@ import React, {Component} from 'react'
 import {HashRouter} from 'react-router-dom'
 import pubSub from 'pubsub-js'
 
+
 import Routes from './Routes'
 import ErrorMsg from '../logMsg/ErrorMsg'
 import SuccessMsg from '../logMsg/SuccessMsg';
+import ReactLoading from 'react-loading'
 
 
 export default class Main extends Component{
@@ -17,7 +19,8 @@ export default class Main extends Component{
                 definitions: '',
                 process: '',
                 constraints: ''
-            }
+            },
+            loading: false
         }
     }
     componentDidMount(){
@@ -37,6 +40,9 @@ export default class Main extends Component{
                 configVisualization: res.configVisualization,
                 clickableProcessIndex: res.clickableProcessIndex}})
         })
+        pubSub.subscribe('loading', (err, bool) => {	
+            this.setState({loading: bool})
+        })
     }
 
     errorDiv = msg => {
@@ -55,8 +61,10 @@ export default class Main extends Component{
     }
 
     render(){
+        let loading = this.state.loading ? <ReactLoading type="spokes" color='#000000' height ='5%' width = '5%' className = 'loading' /> : ''
         return(
             <div>
+                {loading}
                 {this.errorDiv(this.state.errorMsg)}
                 {this.successDiv(this.state.successMsg)}
                 <div className = "container">

@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
-// import pubSub from 'pubsub-js'
 import 'react-tree-graph/dist/style.css'
 import TreeGraph from 'react-tree-graph';
 import tippy from 'tippy.js'
+import ReactLoading from 'react-loading'
 
 import './css/tree.css'
 export default class Tree extends Component{
@@ -12,12 +12,21 @@ export default class Tree extends Component{
         this.config = `${this.props.initialConfig.definitions} ; ${this.props.initialConfig.process} ; ${this.props.initialConfig.constraints}`
         this.state = {
             run: 0,
-            treeData: this.branchFactory('x',
+            errorMsg: '',
+            successMsg: '',
+            treeData: '',
+            loading: false
+            
+        }   
+    }
+    componentWillMount(){
+        let firstBranch = this.branchFactory('x',
                 this.config,
                 this.props.initialConfig.configVisualization,
                 this.props.initialConfig.clickableProcessIndex,
                 '0')
-        }    
+        this.setState({treeData: firstBranch})
+
     }
 
     branchFactory = (parent, config, content, clickableProcessIndex, name = '') => {
@@ -62,48 +71,23 @@ export default class Tree extends Component{
             }
         }
     }
-
-    test = () => {
-        // Delete after testing
-        let tree = this.state.treeData
-        let branch2 = this.branchFactory('0', 'Conteudo2')
-        let branch3 = this.branchFactory('0', 'Conteudo3')
-        let branch4 = this.branchFactory('0', 'Conteudo4')
-        let branch5 = this.branchFactory('0.0', 'Conteudo5')
-        let branch6 = this.branchFactory('0.1', 'Conteudo6')
-        let branch7 = this.branchFactory('0.1', 'Conteudo7')
-        let branch8 = this.branchFactory('0.0.0', 'Conteudo8')
-        let branch9 = this.branchFactory('0.0.0.0', 'Conteudo9')
-        let branch10 = this.branchFactory('0.0.0.0.0', 'Conteudo10')
-        let branch11 = this.branchFactory('0.0.0.0', 'Conteudo11')
-        let branch12 = this.branchFactory('0.0.0.0', 'Conteudo12')
-        let branch13 = this.branchFactory('0.0.0.0', 'Conteudo13')
-        let branch14 = this.branchFactory('0.0.0.0.0', 'Conteudo14')
-        tree = this.addB(branch2, tree)
-        tree = this.addB(branch3, tree)
-        tree = this.addB(branch4, tree)
-        tree = this.addB(branch5, tree)
-        tree = this.addB(branch6, tree)
-        tree = this.addB(branch7, tree)
-        tree = this.addB(branch8, tree)
-        tree = this.addB(branch9, tree)
-        tree = this.addB(branch10, tree)
-        tree = this.addB(branch11, tree)
-        tree = this.addB(branch12, tree)
-        tree = this.addB(branch13, tree)
-        tree = this.addB(branch14, tree)
-        this.setState({treeData: tree, run: this.state.run + 1})
-
+    isSon = (branch, config) => {
+        let bool = false
+        branch.children.forEach(b => {
+            if(b.config === config){
+                bool = true
+            }
+        })
+        return bool
     }
+
     handleNode = (event, nodeKey) => {
         let node = event.target.parentNode
         let branch = this.findB(nodeKey, this.state.treeData)
-        // node.setAttribute("data-tippy-content", `<a class="btn" onClick="test('${nodeKey}')">${branch.content}</a>`)
-        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = test(__;; >").replace(/\*\*c/ig,"</a>")
-        // console.log(branch.clickableProcessIndex[1])
+        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/\*\*c/ig,"</a>")
         let arrShowConfig = []
         showConfig.split(';;').forEach((p, index)=> {
-            arrShowConfig.push(p.replace('__', nodeKey + ',' + index))
+            arrShowConfig.push(p.replace('__', `'${nodeKey}',` + index))
         })
         showConfig = arrShowConfig.join(')')
         node.setAttribute("data-tippy-content", `${showConfig}`)
@@ -112,36 +96,78 @@ export default class Tree extends Component{
             interactive: true
         })
     }
-    inputHandle = (e) => {
+    inputHandle = (e, nodeKey) => {
         let targetArr = e.target.value.split('__')
         let targetName = targetArr[0]
         let indexClickable = targetArr[1]
+        let branch = this.findB(targetName, this.state.treeData)
 
-        console.log(targetName)
-        console.log(indexClickable)
-        console.log(this.findB(targetName, this.state.treeData))
-        console.log(this.findB(targetName, this.state.treeData).clickableProcessIndex[indexClickable])
+        this.metaApp(branch, branch.clickableProcessIndex[indexClickable])
+    }
+
+    metaApp = async (branch, index) => {
+        this.setState({errorMsg: '', successMsg: '', loading: true})
+        const options = {
+            method: 'GET',
+            headers: new Headers({
+                'Content-Type' : 'application/json'
+            })
+        }
+        try {
+            const response = await fetch(`http://localhost:3001/maude/${branch.config}/${index}`, options)
+            if(await response.status === 200){
+                response.json().then( (res) => {
+
+                    let treeData = this.state.treeData
+                    let newConfig = `${res.definitions} ; ${res.process} ; ${res.constraints}` 
+                    if(this.isSon(branch, newConfig)){
+                        this.setState({errorMsg: 'This process was already executed', successMsg: '', loading: false})
+                    }else{
+                        let newBranch = this.branchFactory( branch.name,
+                            newConfig,
+                            res.configVisualization,
+                            res.clickableProcessIndex)
+                        treeData = this.addB(newBranch, treeData)
+                        this.setState({run: this.state.run + 1,
+                             treeData: treeData,
+                             errorMsg: '',
+                             successMsg: 'A new branch was created',
+                             loading: false})
+                    }
+
+                })
+            }else{
+                this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
+            }
+        } catch(err){
+            this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
+        }
     }
 
     render(){
-
-
+        let errorMsg = this.state.errorMsg === '' ? '' : <div className = "alert alert-danger"><p>{this.state.errorMsg}</p></div>
+        let successMsg = this.state.successMsg === '' ? '' : <div className = "alert alert-success"><p>{this.state.successMsg}</p></div>
+        let loading = this.state.loading ? <ReactLoading type="spokes" color='#000000' height ='5%' width = '5%' className = 'loading' /> : ''
         return(
-            
-             <div className = 'treeSvg'>
-                <input onFocus = {this.inputHandle} className = "testInput invisible"/>
-                <button onClick = {this.test} className= "btn btn-info">Test</button>
-                <h2 className = "mt-4">Tree View:</h2>
-                <TreeGraph
-                    key = {this.state.run} 
-                    data={this.state.treeData}
-                    gProps={{
-                        onClick: this.handleNode,
-                        className: 'node'
-                    }}
-                    height={800}
-                    width={800}
-                />;
+            <div>
+                {loading}
+                {errorMsg}
+                {successMsg}
+
+                <div className = 'treeSvg'>
+                    <input onFocus = {this.inputHandle} className = "inviInput invisible"/>
+                    <h2 className = "mt-4">Tree View:</h2>
+                    <TreeGraph
+                        key = {this.state.run} 
+                        data={this.state.treeData}
+                        gProps={{
+                            onClick: this.handleNode,
+                            className: 'node'
+                        }}
+                        height={800}
+                        width={800}
+                        />;
+                </div>
             </div>
             
         )

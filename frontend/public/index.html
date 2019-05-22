@@ -22,7 +22,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>Process Simulator</title>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
@@ -55,12 +55,12 @@
     -->
     <script>
       
-      function test(key, n){
-          var testInput = document.querySelector('.testInput')
-          testInput.classList.remove('invisible')
-          testInput.value = key + '__' + n
-          testInput.select()
-          testInput.classList.add('invisible')
+      function getKey(key, n){
+          var invisibleInput = document.querySelector('.inviInput')
+          invisibleInput.classList.remove('invisible')
+          invisibleInput.value = key + '__' + n
+          invisibleInput.select()
+          invisibleInput.classList.add('invisible')
       }
     </script>
   </body>

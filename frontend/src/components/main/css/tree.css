@@ -23,3 +23,7 @@ svg{
   cursor: pointer;
   
 }
+#loading{
+  margin-top: 1em;
+  border-style: none;
+}

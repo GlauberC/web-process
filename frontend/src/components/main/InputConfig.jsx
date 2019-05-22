@@ -6,10 +6,12 @@ export default props => {
     const errorSuccessPublish = (errorMsg, successMsg='') => {
         pubSub.publish('errorMsg', errorMsg)
         pubSub.publish('successMsg', successMsg)
+        pubSub.publish('loading', false)
     }
 
     const getData = () => {
         errorSuccessPublish('')
+        pubSub.publish('loading', true)
         const input = document.querySelector('.textInput').value
         if (input === ''){
             errorSuccessPublish('Invalid Config')
@@ -57,6 +59,7 @@ export default props => {
     }
 
     const metaRequest = async (config) => {
+        pubSub.publish('loading', true)
         const options = {
             method: 'POST',
             body: JSON.stringify(config),
@@ -94,6 +97,7 @@ export default props => {
         }
     }
     return <div className = "mt-4">
+    
         <div className="form-group mt-4">
             <label htmlFor="input">New Config:</label>
             <textarea className="form-control textInput" rows="5" id="comment" placeholder = "Definition ; Process ; Constraints"></textarea>
