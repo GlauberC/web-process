@@ -161,8 +161,12 @@ mod META-CONFIG is
     eq getProcess( (P && Lp), 0, n) = getProcessAsk(P, n) .
     eq getProcess( (P && Lp), s(n), on) = getProcess(Lp, n , on) .
     op getProcessAsk : AskProcess Nat -> AskProcess .
+
     eq getProcessAsk( ((ask c then P) + LA) , 0) = (ask c then P) .
     eq getProcessAsk( ((ask c then P) + LA) , s(n)) = getProcessAsk(LA, n) .
+--- LASK ADD
+    eq getProcessAsk( ((lask c then P) + LA) , 0) = (lask c then P) .
+    eq getProcessAsk( ((lask c then P) + LA) , s(n)) = getProcessAsk(LA, n) .
     
 
     --- =============================================
@@ -187,12 +191,21 @@ mod META-CONFIG is
     eq getRedex$(call(q), Lp, Lc,n, on ) = ir(n, None, 'call, ( 'q:Qid <- upTerm(q) ; 'Lp':List`{Process`} <- upTerm(Lp) )) .
     --- Case Ask
     eq getRedex$(zero, Lp, Lc,n, on) = nil . --- Empty ask
+
+
     --- Several Asks
     eq getRedex$( ((ask c then P) + LA), Lp, Lc, n, on) =
 	(if Lc |-- c then 
 	    ir(n, next(on), 'sum, ( 'c:Constraint <- upTerm(c) ; 'P:Process <- upTerm(P) ; 'LA':AskProcess <- upTerm(LA) ;  'Lp':List`{Process`} <- upTerm(Lp) ) )
 	  else nil fi )
 	;; getRedex$( LA, Lp, Lc, n, next(on)) .
+
+    --- LASK ADD
+    eq getRedex$( ((lask c then P) + LA), Lp, Lc, n, on) =
+	(if Lc |-- c then 
+	    ir(n, next(on), 'sum, ( 'c:Constraint <- upTerm(c) ; 'P:Process <- upTerm(P) ; 'LA':AskProcess <- upTerm(LA) ;  'Lp':List`{Process`} <- upTerm(Lp) ) )
+	  else nil fi )
+	;; getRedex$( LA, Lp, minus(Lc, c), n, next(on)) .
 endm
 
 
@@ -203,7 +216,11 @@ eof
 red getRedex( < empty ; (ask 'c then tell('d)) + (ask 'c then tell('e)) ; 'c >) .
 
 red getRedex( < empty ; ((ask 'c then tell('d)) + (ask 'd then tell('e))) || tell('x) ; 'c >) .
+
 red metaApp(< empty ; ((ask 'c then tell('d)) + (ask 'd then tell('e))) || tell('x) ; 'c > , 'sum, ('LA':AskProcess <- 'ask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ;  'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort)) .
+
+--- LASK ADD
+red metaApp(< empty ; ((lask 'c then tell('d)) + (lask 'd then tell('e))) || tell('x) ; 'c > , 'sum, ('LA':AskProcess <- 'lask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ;  'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort)) .
 
 
 red getRedex(< def( 'd1, tell('a) ) ; (ask 'a then (tell('xx) || tell('yy))) || call('d1) || tell( 'c ) || tell('d) || ( (ask 'a then tell('x)) + (ask 'a then tell('y)) + (ask 'aa then tell('z))) || (ask 'b then call('d1)); 'a >) .
@@ -215,36 +232,6 @@ red metaApp( < def( 'd1, tell('a) ) ; (ask 'a then (tell('xx) || tell('yy))) || 
 
 red getProcess( ( < def('def , tell('x)) ; tell('a) && tell('b) ; 'b > ), 0, None ) .
 
-
-    
-
-*** metaApp
-*** tell
-red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) ; 'a >, 'tell, ( 'c:Constraint <- upTerm('c) ) ) .
-
-*** askthen
-red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'a >, 'askthen, ( 'c:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ; ask 'a then (tell('b)) ; 'b >, 'askthen, ( 'c:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) . *** proposital error
-
-*** laskthen
-red metaApp( < def( 'd1, tell('a) ) ; lask 'a then (tell('b)) ; 'a >, 'laskthen, ( 'c:Constraint <- upTerm('a) ; 'P:Process <- upTerm(tell('b)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ; lask 'b then (tell('b)) ; 'a >, 'laskthen, ( 'c:Constraint <- upTerm('b) ; 'P:Process <- upTerm(tell('b)) ) ) .
-
-*** sum
-red metaApp( < def( 'd1, tell('a) ) ;  ask 'c then tell('e) + ask 'd then tell('f) ; 'c >, 'sum, ( 'c:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'c then tell('f) ; 'c >, 'sum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  ask 'd then tell('e) + ask 'a then tell('f) ; 'c >, 'sum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
-
-***lsum
-red metaApp( < def( 'd1, tell('a) ) ;  lask 'c then tell('e) + lask 'd then tell('f) ; 'c >, 'lsum, ( 'c:Constraint <- upTerm('c) ; 'P:Process <- upTerm(tell('e)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'c then tell('f) ; 'c >, 'lsum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('f)) ) ) .
-red metaApp( < def( 'd1, tell('a) ) ;  lask 'd then tell('e) + lask 'a then tell('f) ; 'c >, 'lsum, ( 'c:Constraint <- upTerm('d) ; 'P:Process <- upTerm(tell('e)) ) ) . *** proposital error
-
-*** call
-red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('d1) ; 'b >, 'call, ( 'q:Qid <- upTerm('d1) ) ) .
-red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d2) ; 'b >, 'call, ( 'q:Qid <- upTerm('d2) ) ) .
-red metaApp( < ( def( 'd1, tell('a) ), def( 'd2, tell('f) ) ) ; tell( 'c ) || call('d1) || call('d2) ; 'b >, 'call, ( 'q:Qid <- upTerm('d2) ) ) . 
-red metaApp( < def( 'd1, tell('a) ) ; tell( 'c ) || call('f1) ; 'b >, 'call, ( 'q:Qid <- upTerm('f1) ) ) . *** proposital error
 
 
 *** metaRed
