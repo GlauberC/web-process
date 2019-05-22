@@ -54,7 +54,6 @@ module.exports = {
         let command = `${func}( ${config} , ${subs} )`
         command = command.replace(/\n/ig, "")
         command = shellescape(command.split(' ')).replace(/\`/ig, "\\`")
-        // return command
         
         const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
         return result

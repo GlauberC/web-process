@@ -15,20 +15,24 @@ module.exports = {
         let splitedResultOneLine = resultOneLine[0].replace('Maude> Bye.', '').split('InfoRed')[1]
         let separated = splitedResultOneLine.split(';;')
         let clickableProcess = []
-        separated.map( process => {
-            let newProcess = {ir: '', processSubs: ''}
-            if(process.match(/ir\(\d,\s*None/ig)){
-                let separateProcess = /ir\((\d,\s*None),\s*(.+)/ig.exec(process)
-                newProcess.ir = separateProcess[1]
-                newProcess.processSubs = separateProcess[2].replace(/\)\s*$/ig, '')
-            }else{
-                let separateProcess = /ir\((\d,\s*\d+),\s*(.+)/ig.exec(process)
-                newProcess.ir = separateProcess[1]
-                newProcess.processSubs = separateProcess[2].replace(/\)\s*$/ig, '')
-            }
-            
-            clickableProcess.push(newProcess)
-        })
+        if(!/\(nil\)\.L/ig.test(separated[0])){
+
+            separated.map( process => {
+                let newProcess = {ir: '', processSubs: ''}
+                
+                if(process.match(/ir\(\d,\s*None/ig)){
+                    let separateProcess = /ir\((\d,\s*None),\s*(.+)/ig.exec(process)
+                    newProcess.ir = separateProcess[1]
+                    newProcess.processSubs = separateProcess[2].replace(/\)\s*$/ig, '')
+                }else{
+                    let separateProcess = /ir\((\d,\s*\d+),\s*(.+)/ig.exec(process)
+                    newProcess.ir = separateProcess[1]
+                    newProcess.processSubs = separateProcess[2].replace(/\)\s*$/ig, '')
+                }
+                
+                clickableProcess.push(newProcess)
+            })
+        }
         return clickableProcess
         
         

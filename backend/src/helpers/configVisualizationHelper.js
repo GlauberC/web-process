@@ -22,10 +22,7 @@ module.exports = {
                 })
             }
             if (ir !== ''){
-                console.log("AAAAAAAAAAAAAAAAAAAAAAAa ")
-                console.log(redex)
                 redex.map((r2) => {
-                    
                     if(r2.ir == ir){
                         p = 'c**' + p.trim() + '**c'
                     }

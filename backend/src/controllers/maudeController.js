@@ -75,13 +75,14 @@ router.get( '/:config/:index', async ( req, res ) => {
 
         const resultMetaApp = maudeHelper.requestMaudeMetaApp( req.params.config, subs )
         const configuration = resultHelper.createModel( resultMetaApp )
-
         const resultGetRedex = await maudeHelper.requestMaudeGetRedex(
             configuration.definitions,
             configuration.process,
             configuration.constraints
         )
-        const redex = resultHelper.getRedex( resultGetRedex ) 
+        
+        const redex = resultHelper.getRedex( resultGetRedex )
+    
         configuration.configVisualization = configVisunHelper.getConfigVisualization(
             configuration.definitions,
             configuration.process,
