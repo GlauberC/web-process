@@ -101,7 +101,7 @@ export default props => {
         <div className="form-group mt-4">
             <label htmlFor="input">New Config:</label>
             <textarea className="form-control textInput" rows="5" id="comment" placeholder = "Definition ; Process ; Constraints"></textarea>
-            <p className = "text-secondary">{`Tips: def( 'defname, tell('a) ) ; tell( 'a ) || tell( 'b ) ; 'c `}</p>
+            <p className = "text-secondary">{`Tips: def( 'defname, tell('a) ) ; call('defname) || tell( 'b ) || (( ask 'c then tell ('d) ) + ( ask 'c then tell ('e)) + ( ask 'b then tell ('e))  )  ; 'c `}</p>
             <button onClick = {parse} className = "btn btn-primary mt-4">Parse Config</button>
             <button onClick = {createConfig} className = "btn btn-success mt-4">Create Config</button>
         </div>

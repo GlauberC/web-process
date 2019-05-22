@@ -36,5 +36,5 @@ $ sudo npm install
 * Logo em seguida digite, no terminal, o comando:
 
 ```sh
-$ npm start
+$ sudo npm start
 ```
