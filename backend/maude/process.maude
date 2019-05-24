@@ -203,7 +203,7 @@ mod META-CONFIG is
     --- LASK ADD
     eq getRedex$( ((lask c then P) + LA), Lp, Lc, n, on) =
 	(if Lc |-- c then 
-	    ir(n, next(on), 'sum, ( 'c:Constraint <- upTerm(c) ; 'P:Process <- upTerm(P) ; 'LA':AskProcess <- upTerm(LA) ;  'Lp':List`{Process`} <- upTerm(Lp) ) )
+	    ir(n, next(on), 'lsum, ( 'c:Constraint <- upTerm(c) ; 'P:Process <- upTerm(P) ; 'LA':AskProcess <- upTerm(LA) ;  'Lp':List`{Process`} <- upTerm(Lp) ) )
 	  else nil fi )
 	;; getRedex$( LA, Lp, minus(Lc, c), n, next(on)) .
 endm
@@ -220,7 +220,7 @@ red getRedex( < empty ; ((ask 'c then tell('d)) + (ask 'd then tell('e))) || tel
 red metaApp(< empty ; ((ask 'c then tell('d)) + (ask 'd then tell('e))) || tell('x) ; 'c > , 'sum, ('LA':AskProcess <- 'ask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ;  'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort)) .
 
 --- LASK ADD
-red metaApp(< empty ; ((lask 'c then tell('d)) + (lask 'd then tell('e))) || tell('x) ; 'c > , 'sum, ('LA':AskProcess <- 'lask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ;  'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort)) .
+red metaApp(< empty ; ((lask 'c then tell('d)) + (lask 'd then tell('e))) || tell('x) ; 'c > , 'lsum, ('LA':AskProcess <- 'lask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ;  'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort)) .
 
 
 red getRedex(< def( 'd1, tell('a) ) ; (ask 'a then (tell('xx) || tell('yy))) || call('d1) || tell( 'c ) || tell('d) || ( (ask 'a then tell('x)) + (ask 'a then tell('y)) + (ask 'aa then tell('z))) || (ask 'b then call('d1)); 'a >) .
