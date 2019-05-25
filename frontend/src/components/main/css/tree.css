@@ -27,3 +27,6 @@ svg{
   margin-top: 1em;
   border-style: none;
 }
+.sidebar{
+  border-style: groove
+}

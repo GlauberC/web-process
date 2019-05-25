@@ -15,7 +15,8 @@ export default class Tree extends Component{
             errorMsg: '',
             successMsg: '',
             treeData: '',
-            loading: false
+            loading: false,
+            radioExpand: 0
             
         }   
     }
@@ -86,12 +87,12 @@ export default class Tree extends Component{
         // VER MUDANÇA DE COR AQUI
         let node = event.target.parentNode
         let branch = this.findB(nodeKey, this.state.treeData)
-        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/cd\*\*/ig, ";;<a style='color: #FA5858'>").replace(/\*\*c/ig,"</a>")
+        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/cd\*\*/ig, ";;<a style='color: #FA5858'>").replace(/\*\*c/ig,"</a>") + "<br/><br/><a onClick=expand('"+ nodeKey +"') class = 'btn btn-sm btn-primary'>Expand</a>"
         let arrShowConfig = []
         showConfig.split(';;').forEach((p, index)=> {
             arrShowConfig.push(p.replace('__', `'${nodeKey}',` + index + ')'))
         })
-        showConfig = arrShowConfig.join('')
+        showConfig = arrShowConfig.join('').replace(/&&/ig, '||')
         node.setAttribute("data-tippy-content", `${showConfig}`)
         tippy(node, {           
             trigger: 'mouseenter click',
@@ -100,53 +101,104 @@ export default class Tree extends Component{
             
         })
     }
-    inputHandle = (e, nodeKey) => {
-        let targetArr = e.target.value.split('__')
-        let targetName = targetArr[0]
-        let indexClickable = targetArr[1]
-        let branch = this.findB(targetName, this.state.treeData)
+    inputHandle = (e) => {
+        if(/expand\(.+\)/ig.test(e.target.value)){
 
-        this.metaApp(branch, branch.clickableProcessIndex[indexClickable])
+            let name = e.target.value.replace('expand(', '').replace(')', '')
+            let branch = this.findB(name, this.state.treeData)
+            this.expand(branch)
+
+        }else{
+            let targetArr = e.target.value.split('__')
+            let targetName = targetArr[0]
+            let indexClickable = targetArr[1]
+            let branch = this.findB(targetName, this.state.treeData)
+
+            this.metaApp(branch, branch.clickableProcessIndex[indexClickable])
+        }
+        
     }
 
     metaApp = async (branch, index) => {
         this.setState({errorMsg: '', successMsg: '', loading: true})
+        try {
+            await this.metaAppFetch(branch, index)
+            this.setState({
+                errorMsg: '',
+                successMsg: 'A new branch was created',
+                loading: false})
+        } catch(err){
+            this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
+        }
+
+    }
+    metaAppFetch = async (branch, index) => {
         const options = {
             method: 'GET',
             headers: new Headers({
                 'Content-Type' : 'application/json'
             })
         }
-        try {
-            const response = await fetch(`http://localhost:3001/maude/${branch.config}/${index}`, options)
-            if(await response.status === 200){
-                response.json().then( (res) => {
-                    let treeData = this.state.treeData
-                    let newConfig = `${res.definitions} ; ${res.process} ; ${res.constraints}` 
-                    if(this.isSon(branch, newConfig)){
-                        this.setState({errorMsg: 'This process was already executed', successMsg: '', loading: false})
-                    }else{
-                        branch.content = this.clickToClickedProcess( branch, index)
-                        let newBranch = this.branchFactory( branch.name,
-                            newConfig,
-                            res.configVisualization,
-                            res.clickableProcessIndex)
-                        treeData = this.addB(newBranch, treeData)
-                        this.setState({run: this.state.run + 1,
-                             treeData: treeData,
-                             errorMsg: '',
-                             successMsg: 'A new branch was created',
-                             loading: false})
-                    }
+        const response = await fetch(`http://localhost:3001/maude/${branch.config}/${index}`, options)
+        if(await response.status === 200){
+            response.json().then( (res) => {
+                let treeData = this.state.treeData
+                let newConfig = `${res.definitions} ; ${res.process} ; ${res.constraints}` 
+                if(this.isSon(branch, newConfig)){
+                    this.setState({errorMsg: 'This process was already executed', successMsg: ''})
+                }else{
+                    branch.content = this.clickToClickedProcess( branch, index)
+                    let newBranch = this.branchFactory( branch.name,
+                        newConfig,
+                        res.configVisualization,
+                        res.clickableProcessIndex)
+                    this.addB(newBranch, treeData)
+                    this.setState({run: this.state.run + 1,
+                        treeData: treeData})
+                }
 
-                })
-            }else{
-                this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
-            }
-        } catch(err){
+            })
+        }else{
             this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
         }
     }
+
+    expand = branch =>{
+        if(this.state.radioExpand === 0){
+            this.expandVertical(branch)
+        }else if(this.state.radioExpand === 1){
+            console.log('Horizontal First')
+        }else{
+            console.log('Horizontal Random')
+        }
+    }
+
+    expandVertical =  async branch => {
+        this.setState({errorMsg: '', successMsg: '', loading: true})
+        if(branch.content.split(/c\*\*/).length === 1){
+            this.setState({
+                errorMsg: 'Every process was already executed',
+                successMsg: '',
+                loading: false})
+        }else{
+            branch.clickableProcessIndex.forEach( async (i, term) => {
+                try {
+                    await this.metaAppFetch(branch, i)
+                    if(term+1 === branch.clickableProcessIndex.length ){
+                        this.setState({
+                            errorMsg: '',
+                            successMsg: 'A vertical expansion was executed',
+                            loading: false})
+                    }
+                } catch(err){
+                    this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
+                }
+                
+            })
+        }        
+    }
+
+
     clickToClickedProcess = (branch, index) => {
         let newContents = []
         let iterator = -1 // -1 to fix first index with c**
@@ -167,6 +219,9 @@ export default class Tree extends Component{
         return newContents.join('')
     }
 
+    changeRadioExpand = (e) =>{
+        this.setState({radioExpand: Number(e.target.value)})
+    }
     render(){
         let errorMsg = this.state.errorMsg === '' ? '' : <div className = "alert alert-danger"><p>{this.state.errorMsg}</p></div>
         let successMsg = this.state.successMsg === '' ? '' : <div className = "alert alert-success"><p>{this.state.successMsg}</p></div>
@@ -179,17 +234,48 @@ export default class Tree extends Component{
 
                 <div className = 'treeSvg'>
                     <input onFocus = {this.inputHandle} className = "inviInput invisible"/>
-                    <h2 className = "mt-4">Tree View:</h2>
-                    <TreeGraph
-                        key = {this.state.run} 
-                        data={this.state.treeData}
-                        gProps={{
-                            onMouseOver: this.handleNode,
-                            className: 'node'
-                        }}
-                        height={800}
-                        width={800}
-                        />;
+                    <h1 className = "mt-4">Tree View:</h1>
+                    <div className = "row">
+                        <div className = "col-md-9">
+                        <TreeGraph
+                            key = {this.state.run} 
+                            data={this.state.treeData}
+                            gProps={{
+                                onMouseOver: this.handleNode,
+                                className: 'node'
+                            }}
+                            height={800}
+                            width={800}
+                            />;
+                        </div>
+                        <div className = "col-md-3 sidebar">
+                            <div className = "expand">
+
+                            <h3>Expand process</h3>
+                                <div className="form-check">
+                                    <label className="form-check-label">
+                                        <input type="radio" checked={this.state.radioExpand === 0 ? 'checked' : ''} className="form-check-input" onChange = {this.changeRadioExpand} value = '0' name="expand"/>Vertical
+                                    </label>
+                                    </div>
+                                    <div className="form-check">
+                                    <label className="form-check-label">
+                                        <input type="radio" checked={this.state.radioExpand === 1 ? 'checked' : ''} className="form-check-input" onChange = {this.changeRadioExpand} value = '1' name="expand"/>Horizontal First
+                                    </label>
+                                    </div>
+                                    <div className="form-check disabled">
+                                    <label className="form-check-label">
+                                        <input type="radio" checked={this.state.radioExpand === 2 ? 'checked' : ''} className="form-check-input" onChange = {this.changeRadioExpand} value = '2' name="expand"/>Horizontal Random
+                                    </label>
+                                </div>
+                            </div>
+                            <hr/>
+                            <div className = "definitions">
+                                <h3>Definitions:</h3>
+                                <p>{this.props.initialConfig.definitions}</p>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </div>
             

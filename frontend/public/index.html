@@ -54,13 +54,18 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
     <script>
-      
+      function invisibleButton(text){
+        var invisibleInput = document.querySelector('.inviInput')
+        invisibleInput.classList.remove('invisible')
+        invisibleInput.value = text
+        invisibleInput.select()
+        invisibleInput.classList.add('invisible')
+      }
       function getKey(key, n){
-          var invisibleInput = document.querySelector('.inviInput')
-          invisibleInput.classList.remove('invisible')
-          invisibleInput.value = key + '__' + n
-          invisibleInput.select()
-          invisibleInput.classList.add('invisible')
+          invisibleButton(key + '__' + n)
+      }
+      function expand(key){
+        invisibleButton(`expand(${key})`)
       }
     </script>
   </body>
