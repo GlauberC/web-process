@@ -55,7 +55,6 @@ export default class Tree extends Component{
     }
 
     addB = (branch, tree) => {
-        // Turn into promise
         let parentBranch = this.findB(branch.parent, tree)
         if(parentBranch.children.length === 0){
             branch.name = parentBranch.name + '.0'
@@ -73,23 +72,26 @@ export default class Tree extends Component{
     }
     isSon = (branch, config) => {
         let bool = false
-        branch.children.forEach(b => {
-            if(b.config === config){
-                bool = true
-            }
-        })
+        if(branch.children.length !== 0){
+            branch.children.forEach(b => {
+                if(b.config === config){
+                    bool = true
+                }
+            })
+        }
         return bool
     }
 
     handleNode = (event, nodeKey) => {
+        // VER MUDANÇA DE COR AQUI
         let node = event.target.parentNode
         let branch = this.findB(nodeKey, this.state.treeData)
-        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/\*\*c/ig,"</a>")
+        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/cd\*\*/ig, ";;<a style='color: #FA5858'>").replace(/\*\*c/ig,"</a>")
         let arrShowConfig = []
         showConfig.split(';;').forEach((p, index)=> {
-            arrShowConfig.push(p.replace('__', `'${nodeKey}',` + index))
+            arrShowConfig.push(p.replace('__', `'${nodeKey}',` + index + ')'))
         })
-        showConfig = arrShowConfig.join(')')
+        showConfig = arrShowConfig.join('')
         node.setAttribute("data-tippy-content", `${showConfig}`)
         tippy(node, {           
             trigger: 'click',
@@ -117,12 +119,12 @@ export default class Tree extends Component{
             const response = await fetch(`http://localhost:3001/maude/${branch.config}/${index}`, options)
             if(await response.status === 200){
                 response.json().then( (res) => {
-
                     let treeData = this.state.treeData
                     let newConfig = `${res.definitions} ; ${res.process} ; ${res.constraints}` 
                     if(this.isSon(branch, newConfig)){
                         this.setState({errorMsg: 'This process was already executed', successMsg: '', loading: false})
                     }else{
+                        branch.content = this.clickToClickedProcess( branch, index)
                         let newBranch = this.branchFactory( branch.name,
                             newConfig,
                             res.configVisualization,
@@ -142,6 +144,25 @@ export default class Tree extends Component{
         } catch(err){
             this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
         }
+    }
+    clickToClickedProcess = (branch, index) => {
+        let newContents = []
+        let iterator = -1 // -1 to fix first index with c**
+        branch.content.split(/c\*\*/).forEach(piece => {
+            if(branch.clickableProcessIndex.indexOf(index) === iterator){
+                piece = "cd**" + piece
+            }else{
+                piece = "c**" + piece
+                iterator++
+            }
+            if(/cd\*\*/ig.test(piece)){
+                let numberCd = piece.split(/cd\*\*/ig).length
+                iterator +=  numberCd - 1
+            }
+            newContents.push(piece)    
+        })
+        newContents[0] = newContents[0].replace(/c\*\*/ig, '')
+        return newContents.join('')
     }
 
     render(){
