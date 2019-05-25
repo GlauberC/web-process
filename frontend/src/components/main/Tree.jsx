@@ -94,8 +94,10 @@ export default class Tree extends Component{
         showConfig = arrShowConfig.join('')
         node.setAttribute("data-tippy-content", `${showConfig}`)
         tippy(node, {           
-            trigger: 'click',
+            trigger: 'mouseenter click',
+            animation: 'fade',
             interactive: true
+            
         })
     }
     inputHandle = (e, nodeKey) => {
@@ -182,7 +184,7 @@ export default class Tree extends Component{
                         key = {this.state.run} 
                         data={this.state.treeData}
                         gProps={{
-                            onClick: this.handleNode,
+                            onMouseOver: this.handleNode,
                             className: 'node'
                         }}
                         height={800}
