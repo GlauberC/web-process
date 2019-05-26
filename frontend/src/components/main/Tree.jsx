@@ -16,7 +16,8 @@ export default class Tree extends Component{
             successMsg: '',
             treeData: '',
             loading: false,
-            radioExpand: 0
+            radioExpand: 0,
+            expansionSize: 1
             
         }   
     }
@@ -163,7 +164,7 @@ export default class Tree extends Component{
                     }
                 }else{
                     branch.content = this.clickToClickedProcess( branch, index)
-                    let newBranch = this.branchFactory( branch.name,
+                    var newBranch = this.branchFactory( branch.name,
                         newConfig,
                         res.configVisualization,
                         res.clickableProcessIndex,
@@ -173,7 +174,7 @@ export default class Tree extends Component{
                 }
                 this.setState({run: this.state.run + 1,
                     treeData: treeData})
-
+                
             })
         }else{
             this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
@@ -181,12 +182,16 @@ export default class Tree extends Component{
     }
 
     expand = branch =>{
+        // mode:
+        // 0 => first
+        // 1 => random
+
         if(this.state.radioExpand === 0){
             this.expandVertical(branch)
         }else if(this.state.radioExpand === 1){
-            console.log('Horizontal First')
+            this.expandHorizontal(branch, 0)
         }else{
-            console.log('Horizontal Random')
+            this.expandHorizontal(branch, 1)
         }
     }
 
@@ -216,6 +221,54 @@ export default class Tree extends Component{
             })
         }        
     }
+    expandHorizontal =  async (branch, mode) => {
+        let i = 0
+        if(branch.clickableProcessIndex.length === 0){
+            this.setState({
+                errorMsg: 'Every process was already executed',
+                successMsg: '',
+                loading: false})
+        }
+        else{
+            this.setState({errorMsg: '', successMsg: '', loading: true})
+            let iterationBranch = branch
+            for(i; i <= this.state.expansionSize - 1; i++){
+                let index = 0
+                try{
+                    if(iterationBranch.clickableProcessIndex.length === 0){
+                        this.setState({errorMsg: '', successMsg: 'Endline - Expansion stopped', loading: false})
+                        break
+                    }else{
+                        if(mode === 0){
+                            index = iterationBranch.clickableProcessIndex[0]
+                        }else{
+                            let pos = Math.floor(Math.random()*iterationBranch.clickableProcessIndex.length)
+                            index = iterationBranch.clickableProcessIndex[pos]
+                        }
+                        let lastPos = iterationBranch.children.length
+                        await this.metaAppFetch(iterationBranch, index)
+                        iterationBranch = iterationBranch.children[lastPos]
+                    }
+    
+                }catch(err){
+                    if(this.state.errorMsg === ''){
+                        this.setState({errorMsg: 'Expansion stopped - There was an internal error. ', successMsg: '', loading: false})
+                    }else{
+                        this.setState({errorMsg: "Expansion stopped - " + this.state.errorMsg, successMsg: '', loading: false})
+                    }
+                    break
+                }
+            }
+
+        }
+        if(i === this.state.expansionSize){
+            this.setState({
+                errorMsg: '',
+                successMsg: 'A horizontal expansion was executed',
+                loading: false})
+        }
+        
+    }
 
 
     clickToClickedProcess = (branch, index) => {
@@ -238,6 +291,9 @@ export default class Tree extends Component{
 
     changeRadioExpand = (e) =>{
         this.setState({radioExpand: Number(e.target.value)})
+    }
+    changeExpansionSize = (e) => {
+        this.setState({expansionSize: Number(e.target.value)})
     }
     render(){
         let errorMsg = this.state.errorMsg === '' ? '' : <div className = "alert alert-danger"><p>{this.state.errorMsg}</p></div>
@@ -284,6 +340,10 @@ export default class Tree extends Component{
                                         <input type="radio" checked={this.state.radioExpand === 2 ? 'checked' : ''} className="form-check-input" onChange = {this.changeRadioExpand} value = '2' name="expand"/>Horizontal Random
                                     </label>
                                 </div>
+                                {this.state.radioExpand > 0 ? (<div className = 'form-group mt-4'>
+                                        <label htmlFor="hExpandSize">Expansion Size:</label>
+                                        <input id = "hExpandSize" className="form-control" type="number" min = '1' value = {this.state.expansionSize} onChange={this.changeExpansionSize} />
+                                    </div>) : '' }
                             </div>
                             <hr/>
                             <div className = "definitions">
