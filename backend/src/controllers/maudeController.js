@@ -89,7 +89,6 @@ router.get( '/:config/:index', async ( req, res ) => {
             redex
         )
         const indexSplit = req.params.index.split(',')
-        console.log('ALOOOOOOOOOOOOOOO')
         configuration.from = resultHelper.getProcess(maudeHelper.requestMaudeGetProcess(`< ${req.params.config} >`, indexSplit[0], indexSplit[1])).trim()
 
 
