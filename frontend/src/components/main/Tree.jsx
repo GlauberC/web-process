@@ -25,15 +25,17 @@ export default class Tree extends Component{
                 this.config,
                 this.props.initialConfig.configVisualization,
                 this.props.initialConfig.clickableProcessIndex,
+                'x',
                 '0')
         this.setState({treeData: firstBranch})
 
     }
 
-    branchFactory = (parent, config, content, clickableProcessIndex, name = '') => {
+    branchFactory = (parent, config, content, clickableProcessIndex, from = '', name = '') => {
         let newObj = {
             name: name,
             parent: parent,
+            from: from,
             content: content,
             config: config,
             clickableProcessIndex: clickableProcessIndex,
@@ -87,7 +89,8 @@ export default class Tree extends Component{
         // VER MUDANÇA DE COR AQUI
         let node = event.target.parentNode
         let branch = this.findB(nodeKey, this.state.treeData)
-        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/cd\*\*/ig, "<a style='color: #FA5858'>").replace(/\*\*c/ig,"</a>") + "<br/><br/><a onClick=expand('"+ nodeKey +"') class = 'btn btn-sm btn-primary'>Expand</a>"
+        let from = branch.from === 'x' ? '' : `<span class = "small"><br>Generator process: ${branch.from}</span>`
+        let showConfig = '<p>' + branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/cd\*\*/ig, "<a style='color: #FA5858'>").replace(/\*\*c/ig,"</a>") + "<br/><br/><a onClick=expand('"+ nodeKey +"') class = 'btn btn-sm btn-primary'>Expand</a>"+ from + "</p>"
         let arrShowConfig = []
         showConfig.split(';;').forEach((p, index)=> {
             arrShowConfig.push(p.replace('__', `'${nodeKey}',` + index + ')'))
@@ -95,13 +98,14 @@ export default class Tree extends Component{
         showConfig = arrShowConfig.join('').replace(/&&/ig, '||')
         node.setAttribute("data-tippy-content", `${showConfig}`)
         tippy(node, {           
-            trigger: 'mouseenter click',
+            trigger: 'mouseenter',
             animation: 'fade',
             interactive: true
             
         })
     }
     inputHandle = (e) => {
+        tippy.hideAll()
         if(/expand\(.+\)/ig.test(e.target.value)){
 
             let name = e.target.value.replace('expand(', '').replace(')', '')
@@ -162,7 +166,8 @@ export default class Tree extends Component{
                     let newBranch = this.branchFactory( branch.name,
                         newConfig,
                         res.configVisualization,
-                        res.clickableProcessIndex)
+                        res.clickableProcessIndex,
+                        res.from)
                     
                     this.addB(newBranch, treeData)
                 }
@@ -220,8 +225,7 @@ export default class Tree extends Component{
             if(iterator>=0){
                 if(branch.clickableProcessIndex.indexOf(index) === iterator){
                     piece = "cd**" + piece
-                    branch.clickableProcessIndex.splice(iterator, iterator+1)
-
+                    branch.clickableProcessIndex.splice(iterator, 1)
                 }else{
                     piece = "c**" + piece
                 }
