@@ -87,7 +87,7 @@ export default class Tree extends Component{
         // VER MUDANÇA DE COR AQUI
         let node = event.target.parentNode
         let branch = this.findB(nodeKey, this.state.treeData)
-        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/cd\*\*/ig, ";;<a style='color: #FA5858'>").replace(/\*\*c/ig,"</a>") + "<br/><br/><a onClick=expand('"+ nodeKey +"') class = 'btn btn-sm btn-primary'>Expand</a>"
+        let showConfig = branch.content.replace(/c\*\*/ig, "<a style='color: PaleTurquoise;' class='process-clickable' onClick = getKey(__;; >").replace(/cd\*\*/ig, "<a style='color: #FA5858'>").replace(/\*\*c/ig,"</a>") + "<br/><br/><a onClick=expand('"+ nodeKey +"') class = 'btn btn-sm btn-primary'>Expand</a>"
         let arrShowConfig = []
         showConfig.split(';;').forEach((p, index)=> {
             arrShowConfig.push(p.replace('__', `'${nodeKey}',` + index + ')'))
@@ -123,10 +123,15 @@ export default class Tree extends Component{
         this.setState({errorMsg: '', successMsg: '', loading: true})
         try {
             await this.metaAppFetch(branch, index)
-            this.setState({
-                errorMsg: '',
-                successMsg: 'A new branch was created',
-                loading: false})
+            if(this.state.errorMsg === ""){
+                this.setState({
+                    errorMsg: '',
+                    successMsg: 'A new branch was created',
+                    loading: false})
+            }else{
+                this.setState({loading: false})
+            }
+            
         } catch(err){
             this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
         }
@@ -142,20 +147,27 @@ export default class Tree extends Component{
         const response = await fetch(`http://localhost:3001/maude/${branch.config}/${index}`, options)
         if(await response.status === 200){
             response.json().then( (res) => {
+
                 let treeData = this.state.treeData
                 let newConfig = `${res.definitions} ; ${res.process} ; ${res.constraints}` 
                 if(this.isSon(branch, newConfig)){
-                    this.setState({errorMsg: 'This process was already executed', successMsg: ''})
+                    if(branch.clickableProcessIndex.indexOf(index) !== -1 ){
+                        this.setState({errorMsg: 'Duplicate configuration. Another process has already generated this configuration', successMsg: ''})
+                        branch.content = this.clickToClickedProcess( branch, index)
+                    }else{
+                        this.setState({errorMsg: 'This process was already executed', successMsg: ''})
+                    }
                 }else{
                     branch.content = this.clickToClickedProcess( branch, index)
                     let newBranch = this.branchFactory( branch.name,
                         newConfig,
                         res.configVisualization,
                         res.clickableProcessIndex)
+                    
                     this.addB(newBranch, treeData)
-                    this.setState({run: this.state.run + 1,
-                        treeData: treeData})
                 }
+                this.setState({run: this.state.run + 1,
+                    treeData: treeData})
 
             })
         }else{
@@ -175,7 +187,8 @@ export default class Tree extends Component{
 
     expandVertical =  async branch => {
         this.setState({errorMsg: '', successMsg: '', loading: true})
-        if(branch.content.split(/c\*\*/).length === 1){
+        let finalIndex = branch.clickableProcessIndex.length
+        if(branch.clickableProcessIndex.length === 0){
             this.setState({
                 errorMsg: 'Every process was already executed',
                 successMsg: '',
@@ -184,12 +197,13 @@ export default class Tree extends Component{
             branch.clickableProcessIndex.forEach( async (i, term) => {
                 try {
                     await this.metaAppFetch(branch, i)
-                    if(term+1 === branch.clickableProcessIndex.length ){
+                    if(term === finalIndex - 1){
                         this.setState({
                             errorMsg: '',
                             successMsg: 'A vertical expansion was executed',
                             loading: false})
                     }
+                 
                 } catch(err){
                     this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
                 }
@@ -203,19 +217,18 @@ export default class Tree extends Component{
         let newContents = []
         let iterator = -1 // -1 to fix first index with c**
         branch.content.split(/c\*\*/).forEach(piece => {
-            if(branch.clickableProcessIndex.indexOf(index) === iterator){
-                piece = "cd**" + piece
-            }else{
-                piece = "c**" + piece
-                iterator++
+            if(iterator>=0){
+                if(branch.clickableProcessIndex.indexOf(index) === iterator){
+                    piece = "cd**" + piece
+                    branch.clickableProcessIndex.splice(iterator, iterator+1)
+
+                }else{
+                    piece = "c**" + piece
+                }
             }
-            if(/cd\*\*/ig.test(piece)){
-                let numberCd = piece.split(/cd\*\*/ig).length
-                iterator +=  numberCd - 1
-            }
+            iterator++
             newContents.push(piece)    
         })
-        newContents[0] = newContents[0].replace(/c\*\*/ig, '')
         return newContents.join('')
     }
 
