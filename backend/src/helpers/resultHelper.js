@@ -1,7 +1,9 @@
 const configModel = require('../models/ConfigModel')
 module.exports = {
     createModel : result => {
-        const config = /Config:\s*(<\s.+\s>)/i.exec(result.replace(/\n/ig, '').replace(/\s+/ig, ' '))[1]
+        console.log('-------------- AQUI --------------')
+        const config = /result.+/.exec(result.replace(/\n/ig, '').replace(/\s+/ig, ' ').replace(/\(\s/ig, '\(').replace(/\s\)/ig, '\)').replace(/Maude>\sBye\./ig, ''))
+        console.log(config)
         const values = /<\s*(.+)\s*;\s*(.+)\s*;\s*(.+)\s*>/i.exec(config)
         return configModel(
             values[1].trim(),
