@@ -16,7 +16,14 @@ module.exports = {
                     if(index === Number(rSplit[0])){
                         let resultGetProcess = maudeHelper.requestMaudeGetProcess(config, rSplit[0], rSplit[1])
                         let getProcess = resultHelper.getProcess(resultGetProcess).trim()
-                        p = p.replace(getProcess, `c**${getProcess}**c`)
+                        let sum = []
+                        p.split('+').map(pSum => {
+                            if(pSum.replace(/\s/ig, '') === getProcess.replace(/\s/ig, '')){
+                                pSum = `c**${pSum.trim()}**c`
+                            }
+                            sum.push(pSum)
+                        })
+                        p = sum.join(' + ')
                         ir = ''
                     }
                 })
