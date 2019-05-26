@@ -41,7 +41,6 @@ module.exports = {
             }
         })
         
-        console.log(vizualizationProcess.join(' && ') + ' ; ' + constraints)
         return vizualizationProcess.join(' && ') + ' ; ' + constraints
     }
 }

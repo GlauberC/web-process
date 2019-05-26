@@ -2,7 +2,6 @@ const express = require("express")
 const router = express.Router()
 const maudeHelper = require('../helpers/maudeHelper')
 const resultHelper = require('../helpers/resultHelper')
-const processHelper = require('../helpers/processHelper')
 const configVisunHelper = require('../helpers/configVisualizationHelper')
 
 
@@ -89,6 +88,11 @@ router.get( '/:config/:index', async ( req, res ) => {
             configuration.constraints,
             redex
         )
+        const indexSplit = req.params.index.split(',')
+        console.log('ALOOOOOOOOOOOOOOO')
+        configuration.from = resultHelper.getProcess(maudeHelper.requestMaudeGetProcess(`< ${req.params.config} >`, indexSplit[0], indexSplit[1])).trim()
+
+
         redex.map((p) => {
             configuration.clickableProcessIndex.push( p.ir )
         })
