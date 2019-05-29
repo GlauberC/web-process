@@ -150,7 +150,7 @@ export default class InputConfig extends Component{
                 <div className = "definitionsList">
                     {this.arrNumber(this.state.numDefinitions).map(key => <Definition key = {key} value = {key}/>)}
                     {this.state.numDefinitions === 0 ? '' : <p className = "offset-md-2 mt-2 text-secondary">{`Tips: 'defname, tell('a)`}</p>}
-                    <div className = 'row'>
+                    <div className = 'row offset-md-1'>
                         <button onClick = {this.addDefinition} className = "btn btn-primary round-button">Add</button>
                         {this.state.numDefinitions === 0 ? '' : <button onClick = {this.removeDefinition} className = "btn btn-danger round-button right-button">Remove</button>}
                     </div>

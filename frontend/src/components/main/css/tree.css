@@ -28,5 +28,9 @@ svg{
   border-style: none;
 }
 .sidebar{
-  border-style: groove
+  border-style: groove;
+}
+
+ul.list-definition{
+  list-style: none;
 }

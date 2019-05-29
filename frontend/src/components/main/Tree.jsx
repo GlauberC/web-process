@@ -87,7 +87,6 @@ export default class Tree extends Component{
     }
 
     handleNode = (event, nodeKey) => {
-        // VER MUDANÇA DE COR AQUI
         let node = event.target.parentNode
         let branch = this.findB(nodeKey, this.state.treeData)
         let from = branch.from === 'x' ? '' : `<span class = "small"><br>Generator process: ${branch.from}</span>`
@@ -299,6 +298,8 @@ export default class Tree extends Component{
         let errorMsg = this.state.errorMsg === '' ? '' : <div className = "alert alert-danger"><p>{this.state.errorMsg}</p></div>
         let successMsg = this.state.successMsg === '' ? '' : <div className = "alert alert-success"><p>{this.state.successMsg}</p></div>
         let loading = this.state.loading ? <ReactLoading type="spokes" color='#000000' height ='5%' width = '5%' className = 'loading' /> : ''
+
+        let defs = this.props.initialConfig.definitions !== 'empty' ? this.props.initialConfig.definitions.replace(/def\(/ig, '').replace(/\)$/, '').split('),') : ['empty']
         return(
             <div>
                 {loading}
@@ -348,7 +349,9 @@ export default class Tree extends Component{
                             <hr/>
                             <div className = "definitions">
                                 <h3>Definitions:</h3>
-                                <p>{this.props.initialConfig.definitions}</p>
+                                <ul className = 'list-definition'>
+                                    {defs.map(d => <li className = 'mt-2'>{d.replace(',' , ' =')}</li>)}
+                                </ul>
                             </div>
 
                         </div>
