@@ -1,0 +1,9 @@
+.right-button{
+    margin-left: 1em;
+}
+
+.round-button{
+    border-radius: 20px;
+    width: 5em;
+    padding: auto;
+}
