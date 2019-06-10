@@ -1,0 +1,199 @@
+---  A server to execute the functions included in process.maude
+--- Start the server with
+--- set print attribute on .
+--- erew init .
+
+--- A typical client must sent messages of the form
+--- GRDX< empty ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >"
+--- where GRDX means "getRedex"
+--- Every token must be separated by a space. Note, e.g., that 
+--- " ; (ask 'c then ...)" is not valid since there is a space missing
+--- before the "ask"
+
+
+load socket .
+load process .
+
+mod SERVER-MAUDE is
+    inc META-CONFIG .
+    pr CONFIGURATION .
+    pr SOCKET .
+
+    --- Needed Classes 
+    op Server : -> Cid .  
+    op aServer : -> Oid .  
+
+    ----------------------------
+    vars O LISTENER CLIENT : Oid .  
+    var  A : AttributeSet .  
+    vars  N N' : Nat .  
+    vars IP DATA S : String .
+    var rs : FindResult .
+    ----------------------------
+
+    
+    --- Splitting a string using " "
+    op toQid : String Nat Nat -> QidList .
+    eq toQid(DATA, N, N) = nil .
+    eq toQid(DATA, N, N') = qid(substr(DATA, N, sd(N, N'))) .
+
+    op split : String -> QidList .
+    op split : String Nat -> QidList .
+    eq split(DATA) = split(DATA, 0) .
+
+    ceq split(DATA, N) =
+      if rs == notFound then qid(substr(DATA, N, sd(N,  length(DATA)))) else toQid(DATA, N, rs) split(DATA, rs + 1) fi 
+      if rs := find(DATA, " " , N) .
+      
+      
+      --- From Strings to Confirations
+    op convert : String -> Config .
+    eq convert(DATA) = downTerm(getTerm(metaParse(upModule('META-CONFIG, false), split(DATA) , 'Config)), error) .
+
+    --- Get Refex for strings
+    op getRedex : String -> LInfoRed .
+    ceq getRedex(DATA) = if C:Config == error then nil else getRedex(C:Config) fi
+      if C:Config := convert(DATA) .
+      
+
+      ---  from InfoRed terms to strings
+    op $string : InfoRed -> String .
+    eq $string(ir(N, Op:OptNat, Q:Qid, S:Substitution)) = "ir(" + string(N, 10) + ", " +
+	  string(Op:OptNat) + ", '" + string(Q:Qid) + ", " + stringS(S:Substitution) + ")" .
+    
+    op stringLI : LInfoRed -> String .
+    eq stringLI(nil) = "" .
+    eq stringLI(I:InfoRed ;; L:LInfoRed) = $string(I:InfoRed) +
+	(if L:LInfoRed =/= nil then " ;; " else "" fi)  +
+	stringLI(L:LInfoRed) .
+
+    --- Substitutions to strings
+    op $stringS : Assignment -> String .
+    eq $stringS( X:Variable <- T:Term) = stringT(X:Variable) + " <- " + stringT(T:Term) .
+    op stringS : Substitution -> String .
+    eq stringS(none) = "" .
+    eq stringS( (A:Assignment ; S:Substitution) ) = $stringS(A:Assignment) +
+	(if S:Substitution == none then "" else " ; " fi )
+	+ stringS(S:Substitution) . 
+
+
+    --- Terms to Strings
+    op stringT : Term -> String .
+    eq stringT(X:Variable) = "'" + string(getName(X:Variable)) + ":" + string(getType(X:Variable)) .
+    eq stringT(C:Constant) = "'" + string(getName(C:Constant)) + ":" + string(getType(C:Constant)) .
+    eq stringT(Q:Qid [ L:NeTermList ] ) = "'" + string(Q:Qid) + "[" + stringTL(L:NeTermList) + "]" .
+    op stringTL : TermList -> String .
+    eq stringTL(emptyML) = "" .
+    eq stringTL(((T:Term) C L:TermList)) = stringT(T:Term) +
+	(if L:TermList == emptyML then "" else " C " fi )
+	+ stringTL(L:TermList) .
+
+    --- Wrappers
+    op getRedexServer : String -> String .
+    eq getRedexServer(DATA) = stringLI(getRedex(DATA)) .
+
+    op metaRedServer : String -> String .
+    eq metaRedServer(DATA) = 2string(metaRed(convert(DATA))) .
+
+    --- Given a string str1##str2##stre3 returns the triple (str1, str2, str3)
+    sort Triple .
+    op tr : String String String -> Triple [ctor] . 
+    
+    op splitT : String -> Triple .
+    vars str1 str2 str3 : String .
+    vars n1 n2 n3 : Nat .
+    
+    ceq splitT(DATA) = tr(str1, str2, str3) 
+      if  n1 := find(DATA, "#" , 0) /\
+	  n2 := find(DATA, "#" , n1 + 1) /\
+	  str1 := substr(DATA, 0, n1) /\
+	  str2 := substr(DATA, n1 + 1, sd(n2 , s(n1))) /\
+	  str3 := substr(DATA, n2 + 1 , length(DATA)) .
+    
+    
+
+    op getProcessServer : String -> String .
+    ceq getProcessServer(DATA) = 2string(getProcess(convert(str1), rat(str2, 10), srt2OpNat(str3))) 
+	if tr(str1, str2, str3) := splitT(DATA) .
+      
+    op metaAppServer : String -> String .
+    ceq  metaAppServer(DATA) = 2string(metaApp(convert(str1), qid(str2), 
+	  downTerm(getTerm(metaParse(upModule('META-CONFIG, false), split(str3) , 'Substitution)), (none).Substitution) ))
+      if tr(str1, str2, str3) := splitT(DATA) .
+
+    --- Config Nat OptNat -> Process .
+
+    op dispatch : String -> String .
+    ceq dispatch(DATA) = getRedexServer(substr(DATA, 4, length(DATA)))
+      if find(DATA, "GRDX", 0) =/= notFound .
+
+    ceq dispatch(DATA) = metaRedServer(substr(DATA, 4, length(DATA)))
+      if find(DATA, "MTRD", 0) =/= notFound .
+
+    ceq dispatch(DATA) = getProcessServer(substr(DATA, 4, length(DATA)))
+      if find(DATA, "GTPR", 0) =/= notFound .
+
+    ceq dispatch(DATA) = metaAppServer(substr(DATA, 4, length(DATA)))
+      if find(DATA, "MTAP", 0) =/= notFound .
+
+
+
+
+
+      -------------------------
+      --- Communication protocol
+      -------------------------
+
+    rl [createdSocket] :
+	< O : Server | A > createdSocket(O, socketManager, LISTENER)
+      => < O : Server | A > acceptClient(LISTENER, O) .  
+
+    rl [acceptedClient] :
+	< O : Server | A > acceptedClient(O, LISTENER, IP, CLIENT)
+      => < O : Server | A > receive(CLIENT, O)
+        acceptClient(LISTENER, O) [print "Accepted client"] .  
+
+    crl [received] :
+	< O : Server | A > received(O, CLIENT, DATA)
+      => < O : Server | A >
+        send(CLIENT, O, (if S:String == "" then "error" else S:String fi)) 
+      if S:String := dispatch(DATA) [print "Sending to the client"] .
+
+    rl [sent] :
+	< O : Server | A > sent(O, CLIENT) 
+      => < O : Server | A > closeSocket(CLIENT, O) .  
+
+    rl [closedSocket] :
+	< O : Server | A > closedSocket(O, CLIENT, S)
+      => < O : Server | A > [print "Closed socket" ] .
+
+    op init : -> Configuration .
+    eq init = <>
+        < aServer : Server | none >
+        createServerTcpSocket(socketManager, aServer, 8811, 5) .
+endm
+eof
+--- Some examples
+red convert("< empty ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >") .
+red convert("<  def ( 'def , tell ( 'x ) )  ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >") .
+red getRedex("< empty ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >") .
+red stringLI(getRedex("< empty ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >")) .
+red getRedexServer("< empty ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >") .
+
+----------------------------------
+--- New ones
+red metaRedServer("< empty ; ( ask 'c then tell ( 'd ) ) || ( ask 'c then tell ( 'e ) ) ; 'c >") .
+red metaRedServer("< def ( 'def , tell ( 'x ) ) ; ( ask 'c then tell ( 'd ) ) || ( ask 'c then tell ( 'e ) ) ; 'c >") .
+red getProcessServer( "< def ( 'def , tell ( 'x ) ) ; tell ( 'a )  && tell ( 'b )  ; 'b >#0#None" ) .
+red metaAppServer( "< empty ; ( ( ask 'c then tell ( 'd ) )  + ( ask 'd then tell ( 'e ) ) ) || tell ( 'x ) ; 'c >#sum#'LA':AskProcess <- 'ask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ; 'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort" ) .
+
+
+
+
+
+----------------------------------
+--- To start the server
+set print attribute on .
+erew init .
+    
+

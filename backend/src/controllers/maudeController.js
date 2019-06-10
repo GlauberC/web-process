@@ -3,36 +3,37 @@ const router = express.Router()
 const maudeHelper = require('../helpers/maudeHelper')
 const resultHelper = require('../helpers/resultHelper')
 const configVisunHelper = require('../helpers/configVisualizationHelper')
+const ConfigModel = require('../models/ConfigModel')
 
 
 
-router.post( '/', async ( req, res ) => {
-    try{
-        const resultMetaRed = await maudeHelper.requestMaudeMetaRed(
+router.post( '/', ( req, res ) => {
+    
+        maudeHelper.requestMaudeMetaRed(
             req.body.definitions,
             req.body.process,
             req.body.constraints
-        ) 
-        const configuration = resultHelper.createModel( resultMetaRed )
-        const resultGetRedex = await maudeHelper.requestMaudeGetRedex(
-            configuration.definitions,
-            configuration.process,
-            configuration.constraints
-        )
-        const redex = resultHelper.getRedex( resultGetRedex ) 
-        configuration.configVisualization = configVisunHelper.getConfigVisualization(
-            configuration.definitions,
-            configuration.process,
-            configuration.constraints,
-            redex
-        )
-        redex.map((p) => {
-            configuration.clickableProcessIndex.push( p.ir )
-        })
-        res.send( configuration )
-    } catch( err ) {
-        return res.status( 406 ).send( err )
-    }
+        ).then((resultMetaRed) => {
+            maudeHelper.requestMaudeGetRedex(resultMetaRed)
+            .then(resultRedex => {
+                let resultMetaRedsplit = resultMetaRed.replace('<', '').replace('>', '').split(' ; ')
+                let configuration = ConfigModel(resultMetaRedsplit[0].trim(), resultMetaRedsplit[1].trim(), resultMetaRedsplit[2].trim())
+                let redex = resultHelper.getRedex(resultRedex)
+                redex.map((p) => {
+                    configuration.clickableProcessIndex.push( p.ir )
+                })
+                configVisunHelper.getConfigVisualization(
+                        configuration.definitions,
+                        configuration.process,
+                        configuration.constraints,
+                        redex
+                ).then(configVisualization => {
+                    configuration.configVisualization = configVisualization
+                    res.send(configuration)
+                })
+                .catch(err => res.status(500).send(err))
+            }).catch(err => res.status(500).send(err))
+        }).catch(err => res.status(500).send(err))
 })
 
 router.post( '/parse', async ( req, res ) => {

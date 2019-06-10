@@ -14,9 +14,26 @@ mod PROCESS is
     op lask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
     op _+_ : AskProcess AskProcess -> AskProcess [assoc id: zero] .
     op zero : -> AskProcess [ctor] .
+    op call : Qid -> Process [ctor] .
+
+    --- From processes to strings
+    vars P Q : Process .
+    vars AP AQ : AskProcess .
+    vars C : Constraint .
+    var Qn : Qid .
+    op 2string : Process -> String .
+    eq 2string(skip) = "skip" .
+    eq 2string(P || Q) = 2string(P) + " || " + 2string(Q) .
+    eq 2string(tell(C)) = "tell ( " + 2string(C) + " ) " .
+    eq 2string(ask C then P) = "ask " + 2string(C) + " then " + 2string(P) .
+    eq 2string(lask C then P) = "lask " + 2string(C) + " then " + 2string(P) .
+    eq 2string(zero) = "zero" .
+    eq 2string(AP + AQ) = 2string(AP) + " + " + 2string(AQ) .
+    eq 2string(call(Qn)) = "call ( " + string(Qn) + " ) " .
 
 
 endm
+
 
 view Process from TRIV to PROCESS is
     sort Elt to Process .
@@ -24,6 +41,13 @@ endv
 
 mod LIST-PROCESS is
     protecting LIST{Process} * (op __ to _&&_) .
+
+    --- to String
+    var P : Process .
+    var L : List{Process} . 
+    op 2string : List{Process} -> String .
+    eq 2string(nil) = "nil" .
+    ceq 2string( (P && L)) = 2string(P) + " && " + 2string(L) if L =/= nil .
 endm
 
 
@@ -32,9 +56,15 @@ mod DEFINITION is
     sort Def .
 
     op def : Qid Process -> Def [ctor] .
-    op call : Qid -> Process [ctor] .
+
+    --- toString
+    var Q : Qid .
+    var P : Process .
+    op 2string : Def -> String .
+    eq 2string( def(Q, P)) = "def ( '" + string(Q) + " , " + 2string(P) + " ) " .
 
 endm
+
 
 view Def from TRIV to DEFINITION is
     sort Elt to Def .
@@ -42,6 +72,14 @@ endv
 
 mod SET-DEFINITION is
     protecting SET{Def} .
+    --- to string
+    var Q : Qid .
+    var P : Process .
+    var D : Def .
+    var SD : Set{Def} .
+    op 2string : Set{Def} -> String .
+    eq 2string((empty).Set{Def}) = "empty" .
+    ceq 2string( (D, SD) ) = 2string(D) + " , " + 2string(SD) if SD =/= empty .
 endm
 
 
@@ -64,7 +102,9 @@ mod CONFIG is
     var q : Qid .
     vars LA LA' : AskProcess .
 
-    
+    --- to String
+    op 2string : Config -> String .
+    eq 2string( < Ld ; Lp ; Lc > ) = " < " + 2string(Ld) + " ; " + 2string(Lp) + " ; " + 2string(Lc) + " > " .
     
 
 
@@ -91,6 +131,7 @@ endm
 
 mod META-CONFIG is
     pr CONFIG .
+    pr CONVERSION .
     pr NAT .
     pr META-LEVEL * (op empty to emptyML , op _\_ to _\M\_ , op _,_ to _C_ , op insert to insert' , op delete to delete', op _in_ to _in'_, op |_| to ||_||, op $card to $card', op union to union' , op intersection to intersection' , op $intersect to $intersect', op $diff to $diff', op _subset_ to _subset'_ , op _psubset_ to _psubset'_ ) .
 
@@ -121,6 +162,17 @@ mod META-CONFIG is
     vars n n' : Nat .
     vars on on' : OptNat .
     -------
+
+    --- From OptNat to String
+    op string : OptNat -> String .
+    eq string(n:Nat) = string(n:Nat, 10 ) .
+    eq string(None) = "None" .
+
+    --- From String to OptNat
+    op srt2OpNat : String -> OptNat .
+    eq srt2OpNat("None") = None .
+    eq srt2OpNat(S:String) = rat(S:String, 10) [owise] .
+    
     --- Next element (successor)
     op next : OptNat -> Nat .
     eq next(None) = 0 .

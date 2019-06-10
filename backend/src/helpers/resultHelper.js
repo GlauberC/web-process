@@ -1,9 +1,7 @@
 const configModel = require('../models/ConfigModel')
 module.exports = {
     createModel : result => {
-        console.log('-------------- AQUI --------------')
         const config = /result.+/.exec(result.replace(/\n/ig, '').replace(/\s+/ig, ' ').replace(/\(\s/ig, '\(').replace(/\s\)/ig, '\)').replace(/Maude>\sBye\./ig, ''))
-        console.log(config)
         const values = /<\s*(.+)\s*;\s*(.+)\s*;\s*(.+)\s*>/i.exec(config)
         return configModel(
             values[1].trim(),
@@ -13,9 +11,7 @@ module.exports = {
         
     },
     getRedex : result => {
-        let resultOneLine = /InfoRed:.+Maude> Bye./.exec(result.replace(/\n/ig, '').replace(/\t/ig, ''))
-        let splitedResultOneLine = resultOneLine[0].replace('Maude> Bye.', '').split('InfoRed')[1]
-        let separated = splitedResultOneLine.split(';;')
+        let separated = result.split(';;')
         let clickableProcess = []
         if(!/\(nil\)\.L/ig.test(separated[0])){
 

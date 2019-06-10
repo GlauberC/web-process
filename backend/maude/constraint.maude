@@ -1,15 +1,25 @@
 fmod ATOM is
-  pr QID .
-  sort Atom .
-  subsort Qid < Atom .
+    pr QID .
+    pr STRING .
+    sort Atom .
+    subsort Qid < Atom .
 endfm
 
 fmod CONSTRAINT is
-  pr ATOM .
-  sort Constraint .
-  subsort Atom < Constraint .
-  op True : -> Constraint [ctor] .
-  op _^_ : Constraint Constraint -> Constraint .
+    pr ATOM .
+    sort Constraint .
+    subsort Atom < Constraint .
+    op True : -> Constraint [ctor] .
+    op _^_ : Constraint Constraint -> Constraint .
+
+    --- toStrings
+    vars C C' : Constraint .
+    var Q : Qid .
+    op 2string : Constraint -> String .
+    eq 2string(True) = "True" .
+    eq 2string(C ^ C') = 2string(C) + " ^ " + 2string(C') .
+    eq 2string(Q) = "'" + string(Q) .
+    
 endfm
 
 view Constraint from TRIV to CONSTRAINT is
@@ -21,27 +31,32 @@ fmod SET-CONSTRAINT is
 endfm
 
 fmod CONSTRAINTS-OPERATIONS is
-  pr BOOL-OPS .
-  pr SET-CONSTRAINT .
-  pr CONSTRAINT .
+    pr BOOL-OPS .
+    pr SET-CONSTRAINT .
+    pr CONSTRAINT .
 
-  op _|--_ : Set{Constraint} Constraint -> Bool .
-  op minus : Set{Constraint} Set{Constraint} -> Set{Constraint} .
+    op _|--_ : Set{Constraint} Constraint -> Bool .
+    op minus : Set{Constraint} Set{Constraint} -> Set{Constraint} .
 
-  vars L L' S S' : Set{Constraint} .
-  vars C C' : Constraint .
-  vars a b c d : Atom .
+    vars L L' S S' : Set{Constraint} .
+    vars C C' : Constraint .
+    vars a b c d : Atom .
 
-  eq (L , C ^ C')  |-- L' = (L , C , C') |-- L' .
+    --- to String
+    op 2string : Set{Constraint} -> String .
+    eq 2string(empty) = "empty" .
+    ceq 2string( (C , L)) = 2string(C) + " , " + 2string(L) if L =/= empty .
 
-  eq minus((L), (L)) = empty .
-  eq minus((L, S), (L', S)) = L .
+    eq (L , C ^ C')  |-- L' = (L , C , C') |-- L' .
 
-  eq L |-- True = true .
-  eq (L, a) |-- a = true .
-  eq L |-- b = false [owise] .
+    eq minus((L), (L)) = empty .
+    eq minus((L, S), (L', S)) = L .
 
-  eq L |-- C ^ C' = L |-- C and L |-- C' .
+    eq L |-- True = true .
+    eq (L, a) |-- a = true .
+    eq L |-- b = false [owise] .
+
+    eq L |-- C ^ C' = L |-- C and L |-- C' .
 
 endfm
 
