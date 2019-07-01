@@ -22,14 +22,19 @@ mod PROCESS is
     vars C : Constraint .
     var Qn : Qid .
     op 2string : Process -> String .
+    op 2stringAsk : AskProcess -> String .
+    
     eq 2string(skip) = "skip" .
     eq 2string(P || Q) = 2string(P) + " || " + 2string(Q) .
     eq 2string(tell(C)) = "tell ( " + 2string(C) + " ) " .
-    eq 2string(ask C then P) = "ask " + 2string(C) + " then " + 2string(P) .
-    eq 2string(lask C then P) = "lask " + 2string(C) + " then " + 2string(P) .
-    eq 2string(zero) = "zero" .
-    eq 2string(AP + AQ) = 2string(AP) + " + " + 2string(AQ) .
-    eq 2string(call(Qn)) = "call ( " + string(Qn) + " ) " .
+    eq 2string(call(Qn)) = "call ( '" + string(Qn) + " ) " .
+
+    eq 2string(AP) = 2stringAsk(AP) .
+    eq 2stringAsk(ask C then P) = "ask " + 2string(C) + " then " + 2string(P) .
+    eq 2stringAsk(lask C then P) = "lask " + 2string(C) + " then " + 2string(P) .
+    eq 2stringAsk(zero) = "zero" .
+    eq 2stringAsk(AP + AQ) =  " ( " +  2string(AP) + " + " + 2string(AQ) + " ) " .
+    
 
 
 endm

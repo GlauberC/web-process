@@ -50,7 +50,6 @@ export default class InputConfig extends Component{
                 def = 'empty'
             }
         }
-
         return { // Use in parse
             definitions: def,
             process: inputDPC[0].trim().replace(/\n/, ''),
@@ -104,7 +103,7 @@ export default class InputConfig extends Component{
                     setTimeout(() => {
                         this.errorSuccessPublish('', '')
                         return this.props.history.push('/tree')
-                    } , 500)
+                    } , 200)
                 })
             }else{
                 this.errorSuccessPublish('There was an internal error')

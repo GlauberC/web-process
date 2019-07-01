@@ -1,8 +1,7 @@
-const shell = require('shelljs')
-const shellescape = require('shell-escape');
-require('dotenv/config')
+var net = require('net');
+const {PromiseSocket} = require("promise-socket") 
 const connectionHelper = require('./connectionHelper')
-// const stringTreatment = require('../helpers/StringTreatment')
+
 
 
 
@@ -29,7 +28,7 @@ module.exports = {
         }
     },
     requestMaudeGetProcess: async function(config, index0, index1){
-        config = config.replace(/call\s*\(\s/ig, "call ( '")
+        // config = config.replace(/call\s*\(\s/ig, "call ( '")
         try{
             const func = `GTPR`
             let command = `${func}${config.trim()}#${index0.trim()}#${index1.trim()}`.trim()
@@ -39,14 +38,11 @@ module.exports = {
             console.log(err)
         }
     },
-    requestMaudeParseMetaRed: function (def, process, constraints){
-
-        const config = `< ${def} ; ${process} ; ${constraints} >`
-        const func = `metaRed`
-        let command = `${func}(${config})`
-        command = command.replace(/\n/ig, "")
-        command = shellescape(command.split(' '))
-        return shell.exec(`timeout 30 sh -c "echo parse ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
+    requestMaudeParseMetaRed: async function (def, process, constraints){
+        try{
+        }catch(err){
+            console.log(err)
+        }
     },
     requestMaudeGetRedex : function (config){
         config = config.replace(/call\s*\(\s/ig, "call ( '")
@@ -66,15 +62,26 @@ module.exports = {
             console.log(err)
         }
     },
-    requestMaudeMetaApp : function (config, subs){
-        config = `< ${config} >`
-        const func = `metaApp`
-        let command = `${func}( ${config} , ${subs} )`
-        command = command.replace(/\n/ig, "")
-        command = shellescape(command.split(' ')).replace(/\`/ig, "\\`")
-        
-        const result = shell.exec(`timeout 30 sh -c "echo red ${command} . | ${DIR_MAUDE} ${DIR_FILE_MAUDE}"`);
-        return result
+    requestMaudeMetaApp : async function (config, subs){
+        try{
+            return new Promise(
+                async (resolve, reject) => {
+                    setTimeout(()=> {
+                        reject('MetaApp - Timeout')
+                    }, 5000)
+                    const func = `MTAP`
+                    let subsSplit = subs.split(',')
+                    console.log(subsSplit)
+                    let command = `${func}${config}#${subsSplit[0].replace("'", "")}#${subsSplit[1].trim()}`
+                    // let test = "MTAP< empty ; ( ( ask 'c then tell ( 'd ) )  + ( ask 'd then tell ( 'e ) ) ) || tell ( 'x ) ; 'c >#sum#'LA':AskProcess <- 'ask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ; 'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort"
+                    console.log(command)
+                    let result = await connectionHelper(command)
+                    resolve(result)
+                }
+            )
+        }catch(err){
+            console.log(err)
+        }
     }
     
 }
