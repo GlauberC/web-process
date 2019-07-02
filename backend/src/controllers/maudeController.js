@@ -41,23 +41,54 @@ router.post( '/parse', async ( req, res ) => {
 })
 
 router.get( '/:config/:index', ( req, res ) => {
-    let startConfig = `< ${req.params.config} >`
-    maudeHelper.requestMaudeGetRedex(startConfig)
-    .then(resultCompareRedex => {
-        const compareRedex = resultHelper.getRedex( resultCompareRedex )
-        let subs = ''
-        compareRedex.map(p => {
-            if( p.ir === req.params.index ){
-                subs = p.processSubs
-            }
+    let configStart =  `< ${req.params.config} >`
+    let configurationSplit = req.params.config.split(';')
+    maudeHelper.requestMaudeMetaRed(configurationSplit[0],
+                                    configurationSplit[1],
+                                    configurationSplit[2])
+    .then(metaRedResult => 
+        maudeHelper.requestMaudeGetRedex(metaRedResult)
+        .then(resultCompareRedex => {
+            const compareRedex = resultHelper.getRedex( resultCompareRedex )
+            let subs = ''
+            compareRedex.map(p => {
+                if( p.ir === req.params.index ){
+                    subs = p.processSubs
+                }
+            })
+            maudeHelper.requestMaudeMetaApp( metaRedResult.trim(), subs )
+            .then(resultMetaApp => {
+                maudeHelper.requestMaudeGetRedex(resultMetaApp)
+                .then(resultRedex => {
+                    let resultMetaAppSplit = resultMetaApp.replace('<', '').replace('>', '').split(' ; ')
+                    let configuration = ConfigModel(resultMetaAppSplit[0].trim(), resultMetaAppSplit[1].trim(), resultMetaAppSplit[2].trim())
+                    let redex = ''
+                    if (resultRedex !== 'nil'){
+                        redex = resultHelper.getRedex(resultRedex)
+                        redex.map((p) => {
+                            configuration.clickableProcessIndex.push( p.ir )
+                        })
+                    }else{
+                            redex = 'nil'
+                    }
+                    configVisunHelper.getConfigVisualization(
+                        configuration.definitions,
+                        configuration.process,
+                        configuration.constraints,
+                        redex
+                    ).then(configVisualization => {
+                        configuration.configVisualization = configVisualization
+                        res.send(configuration)
+                    })
+                    .catch(err => res.status(500).send(err))
+                }).catch(err => res.status(500).send(err))
+            }).catch(err => res.status(500).send(err))
         })
-        maudeHelper.requestMaudeMetaApp( startConfig, subs )
-        .then(resultMetaApp => {
-            res.send(resultMetaApp)
-        }).catch(err => res.status(500).send(err))
-        
-    })
+        .catch(err => res.status(500).send(err))
+        )
     .catch(err => res.status(500).send(err))
+
+
 
 
 

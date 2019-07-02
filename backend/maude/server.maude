@@ -80,11 +80,11 @@ mod SERVER-MAUDE is
     --- Terms to Strings
     op stringT : Term -> String .
     eq stringT(X:Variable) = "'" + string(getName(X:Variable)) + ":" + string(getType(X:Variable)) .
-    eq stringT(C:Constant) = "'" + string(getName(C:Constant)) + ":" + string(getType(C:Constant)) .
+    eq stringT(C:Constant) = "'" + string(getName(C:Constant)) + "." + string(getType(C:Constant)) .
     eq stringT(Q:Qid [ L:NeTermList ] ) = "'" + string(Q:Qid) + "[" + stringTL(L:NeTermList) + "]" .
     op stringTL : TermList -> String .
     eq stringTL(emptyML) = "" .
-    eq stringTL(((T:Term) C L:TermList)) = stringT(T:Term) +
+    eq stringTL(((T:Term) C L:TermList)) = " ( " + stringT(T:Term) + " ) " + 
 	(if L:TermList == emptyML then "" else " C " fi )
 	+ stringTL(L:TermList) .
 
@@ -173,6 +173,17 @@ mod SERVER-MAUDE is
         createServerTcpSocket(socketManager, aServer, 8811, 5) .
 endm
 eof
+
+red dispatch("MTRD< empty ; ( ( ask 'c then tell ( 'd ) )  + ( ask 'd then tell ( 'e ) ) ) || tell ( 'x ) ; 'c >") .
+red dispatch("GRDX< empty ;  ( ask 'c then tell ( 'd )  + ask 'd then tell ( 'e )  )  && tell ( 'x )  ; 'c >") .
+ "ir(0, 0, 'sum, 'LA':AskProcess <- 'ask_then_[ ( ''d.Sort )  C  ( 'tell[ ( ''e.Sort ) ] ) ] ; 'Lp':List`{Process`} <- 'tell[ ( ''x.Sort ) ] ; 'P:Process <- 'tell[ ( ''d.Sort ) ] ; 'c:Constraint <- ''c.Sort) ;; ir(1, None, 'tell, 'Lp':List`{Process`} <- 'nil.List`{Process`} ; 'c:Constraint <- ''x.Sort)"
+
+red dispatch("MTAP< empty ;  ( ask 'c then tell ( 'd )  + ask 'd then tell ( 'e )  )  && tell ( 'x )  ; 'c >#sum#'LA':AskProcess <- 'ask_then_[ ( ''d.Sort )  C  ( 'tell[ ( ''e.Sort ) ] ) ] ; 'Lp':List`{Process`} <- 'tell[ ( ''x.Sort ) ] ; 'P:Process <- 'tell[ ( ''d.Sort ) ] ; 'c:Constraint <- ''c.Sort") .
+
+red dispatch("MTAP< empty ;  ( ask 'c then tell ( 'd )  + ask 'd then tell ( 'e )  )  && tell ( 'x )  ; 'c >#tell#'Lp':List`{Process`} <- 'nil.List`{Process`} ; 'c:Constraint <- ''x.Sort") .
+
+
+--- ***********************************
 --- Some examples
 red convert("< empty ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >") .
 red convert("<  def ( 'def , tell ( 'x ) )  ; ( ask 'c then tell ( 'd ) ) + ( ask 'c then tell ( 'e ) ) ; 'c >") .

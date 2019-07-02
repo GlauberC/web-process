@@ -45,10 +45,12 @@ module.exports = {
         }
     },
     requestMaudeGetRedex : function (config){
-        config = config.replace(/call\s*\(\s/ig, "call ( '")
         try{
             return new Promise(               
                 async (resolve, reject) => {
+                    if (config.split(';')[1].trim() === 'nil'){
+                        resolve('nil')
+                    }
                     setTimeout(()=> {
                         reject('GetRedex - Timeout')
                     }, 5000)
@@ -71,10 +73,7 @@ module.exports = {
                     }, 5000)
                     const func = `MTAP`
                     let subsSplit = subs.split(',')
-                    console.log(subsSplit)
                     let command = `${func}${config}#${subsSplit[0].replace("'", "")}#${subsSplit[1].trim()}`
-                    // let test = "MTAP< empty ; ( ( ask 'c then tell ( 'd ) )  + ( ask 'd then tell ( 'e ) ) ) || tell ( 'x ) ; 'c >#sum#'LA':AskProcess <- 'ask_then_[''d.Sort C ('tell[''e.Sort])] ;  'Lp':List`{Process`} <- 'tell[''x.Sort] ; 'P:Process <- 'tell[''d.Sort] ;  'c:Constraint <- ''c.Sort"
-                    console.log(command)
                     let result = await connectionHelper(command)
                     resolve(result)
                 }

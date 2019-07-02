@@ -23,6 +23,7 @@ mod PROCESS is
     var Qn : Qid .
     op 2string : Process -> String .
     op 2stringAsk : AskProcess -> String .
+
     
     eq 2string(skip) = "skip" .
     eq 2string(P || Q) = 2string(P) + " || " + 2string(Q) .
@@ -95,7 +96,7 @@ mod CONFIG is
     sort Config .
 
     op <_;_;_>  : Set{Def} List{Process} Set{Constraint} -> Config [ctor] .
-
+    op error : -> Config [ctor] .
 
     vars Lp, Lp' : List{Process} .
     var Pa : AskProcess .
@@ -110,7 +111,7 @@ mod CONFIG is
     --- to String
     op 2string : Config -> String .
     eq 2string( < Ld ; Lp ; Lc > ) = " < " + 2string(Ld) + " ; " + 2string(Lp) + " ; " + 2string(Lc) + " > " .
-    
+    eq 2string(error) = "error" .
 
 
     rl [tell] : < Ld ; (Lp && tell(c) && Lp') ; Lc > => < Ld ; (Lp && Lp') ; (Lc, c) > .
@@ -140,7 +141,7 @@ mod META-CONFIG is
     pr NAT .
     pr META-LEVEL * (op empty to emptyML , op _\_ to _\M\_ , op _,_ to _C_ , op insert to insert' , op delete to delete', op _in_ to _in'_, op |_| to ||_||, op $card to $card', op union to union' , op intersection to intersection' , op $intersect to $intersect', op $diff to $diff', op _subset_ to _subset'_ , op _psubset_ to _psubset'_ ) .
 
-    op error : -> Config [ctor] .
+
     op metaRed : Config -> Config .
     op metaRew : Config Nat -> Config .
     op metaApp : Config Qid Substitution -> Config .
