@@ -78,7 +78,13 @@ router.get( '/:config/:index', ( req, res ) => {
                         redex
                     ).then(configVisualization => {
                         configuration.configVisualization = configVisualization
-                        res.send(configuration)
+                        let indexs = req.params.index.split(',')
+                        maudeHelper.requestMaudeGetProcess(metaRedResult, indexs[0], indexs[1])
+                        .then(getProcessResult => {
+                            configuration.from = getProcessResult.trim()
+                            res.send(configuration)
+                        })
+                        .catch(err => res.status(500).send(err))
                     })
                     .catch(err => res.status(500).send(err))
                 }).catch(err => res.status(500).send(err))
