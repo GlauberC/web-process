@@ -16,18 +16,24 @@ Para que o programa rode é necessário realizar o download e a instalação dos
 $ sudo npm install
 ```
 
-Em seguida é necessário configurar as variáveis do Maude. Para isso basta editar o script/start do arquivo package.json da pasta backend
-```
-"start": "MAUDE_DIR='/usr/bin/maude' node index.js"
-```
-
-* Logo em seguida digite, no terminal, o comando:
+* Após a instalação, basta ativar o servidor node através do comando:
 ```sh
 $ npm start
 ```
 
+* Além disso, é necessário ativar o servidor Maude, para isso basta ir até o diretório backend/maude e executar o Maude em outra janela do terminal com o comando: 
+```sh
+$ maude server.maude
+```
+Em seguida executar os comandos: 
+```sh
+Maude> set print attribute on .
+Maude> erew init .
+```
+
+
 ## Frontend
-* Inicialmente é necessário fazer o download de todos os módulos do react necessários para o projeto, para isso navegue na pasta do frontend e execute, no terminal, o comando:
+* Inicialmente é necessário fazer o download de todos os módulos do react necessários para o projeto, para isso navegue na pasta do frontend e execute, no terminal(em outra janela), o comando:
 
 ```sh
 $ sudo npm install

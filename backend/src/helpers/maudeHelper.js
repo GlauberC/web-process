@@ -96,6 +96,7 @@ module.exports = {
                         let redexResult = await this.getRedexExpand(metaAppResult)
                         let resultMetaAppSplit = metaAppResult.replace('<', '').replace('>', '').split(' ; ')
                         let configuration = ConfigModel(resultMetaAppSplit[0].trim(), resultMetaAppSplit[1].trim(), resultMetaAppSplit[2].trim())
+                        configuration.fromIndex = index
                         let redex = ''
                         if (redexResult !== 'nil'){
                             redex = resultHelper.getRedex(redexResult)

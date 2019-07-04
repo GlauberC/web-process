@@ -182,15 +182,15 @@ export default class Tree extends Component{
 
     expand = branch =>{
         // mode:
-        // 0 => first
-        // 1 => random
+        // 0 => random
+        // 1 => first
 
         if(this.state.radioExpand === 0){
             this.expandVertical(branch)
         }else if(this.state.radioExpand === 1){
-            this.expandHorizontal(branch, 0)
-        }else{
             this.expandHorizontal(branch, 1)
+        }else{
+            this.expandHorizontal(branch, 0)
         }
     }
 
@@ -228,7 +228,60 @@ export default class Tree extends Component{
                 successMsg: '',
                 loading: false})
         }else{
-            
+            const options = {
+                method: 'GET',
+                headers: new Headers({
+                    'Content-Type' : 'application/json'
+                })
+            }
+            let index = mode === 1 ? branch.clickableProcessIndex[0] : branch.clickableProcessIndex[Math.floor(Math.random() * branch.clickableProcessIndex.length)]
+            let size = this.state.expansionSize
+            let url = `http://localhost:3001/maude/expand/horizontal/${branch.config.trim()}/${index.trim()}/${size}/${mode}`
+            try{
+                const response = await fetch(url, options)
+                response.json().then(async res => {
+                    if(await response.status === 200){
+                        res.map((b) => {
+                            let treeData = this.state.treeData
+                            let newConfig = `${b.definitions} ; ${b.process} ; ${b.constraints}` 
+                            if(this.isSon(branch, newConfig)){
+                                if(branch.clickableProcessIndex.indexOf(b.fromIndex) !== -1 ){
+                                    this.setState({errorMsg: 'Duplicate configuration. Another process has already generated this configuration', successMsg: ''})
+                                    branch.content = this.clickToClickedProcess(branch, b.fromIndex)
+                                }else{
+                                    this.setState({errorMsg: 'This process was already executed', successMsg: ''})
+                                }
+                            }else{
+                                branch.content = this.clickToClickedProcess( branch, b.fromIndex)
+                                var newBranch = this.branchFactory( branch.name,
+                                    newConfig,
+                                    b.configVisualization,
+                                    b.clickableProcessIndex,
+                                    b.from)
+                                
+                                this.addB(newBranch, treeData)
+                            }
+                            this.setState({run: this.state.run + 1,
+                                treeData: treeData})
+                            branch = newBranch
+                            this.setState({
+                                errorMsg: '',
+                                successMsg: 'A horizontal expansion was executed',
+                                loading: false})
+                        })
+
+
+
+
+                    }else{
+                        this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
+                    }
+    
+                })
+
+            } catch(err){
+                this.setState({errorMsg: 'There was an internal error', successMsg: '', loading: false})
+            }
         }
        
         
