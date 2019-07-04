@@ -1,5 +1,6 @@
-const maudeHelper = require('../helpers/maudeHelper')
-const resultHelper = require('../helpers/resultHelper')
+const maudeHelper = require('./maudeHelper')
+const resultHelper = require('./resultHelper')
+
 module.exports = {
     getConfigVisualization: async (def, process, constraints, redex) => {
         return new Promise(
@@ -44,5 +45,5 @@ module.exports = {
                     resolve('nil' + ' ; ' + constraints)
                 }
             })
-    }
+    },
 }

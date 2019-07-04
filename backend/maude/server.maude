@@ -81,7 +81,7 @@ mod SERVER-MAUDE is
     op stringT : Term -> String .
     eq stringT(X:Variable) = "'" + string(getName(X:Variable)) + ":" + string(getType(X:Variable)) .
     eq stringT(C:Constant) = "'" + string(getName(C:Constant)) + "." + string(getType(C:Constant)) .
-    eq stringT(Q:Qid [ L:NeTermList ] ) = "'" + string(Q:Qid) + "[" + stringTL(L:NeTermList) + "]" .
+    eq stringT(Q:Qid [ L:NeTermList ] ) = "'" + string(Q:Qid) + " [" + stringTL(L:NeTermList) + "]" .
     op stringTL : TermList -> String .
     eq stringTL(emptyML) = "" .
     eq stringTL(((T:Term) C L:TermList)) = " ( " + stringT(T:Term) + " ) " + 

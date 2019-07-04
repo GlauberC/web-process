@@ -37,7 +37,13 @@ router.post( '/', ( req, res ) => {
 })
 
 router.post( '/parse', async ( req, res ) => {
-    res.send('ok')
+    maudeHelper.requestMaudeMetaRed(
+        req.body.definitions,
+        req.body.process,
+        req.body.constraints
+    ).then((resultMetaRed) => {
+        resultMetaRed === 'error' ? res.status(406).send('error') : res.send('ok')
+    }).catch(err => res.status(500).send(err))
 })
 
 router.get( '/:config/:index', ( req, res ) => {
@@ -93,58 +99,14 @@ router.get( '/:config/:index', ( req, res ) => {
         .catch(err => res.status(500).send(err))
         )
     .catch(err => res.status(500).send(err))
+})
 
-
-
-
-
-
-
-    //  try{
-    //     configurationSplit = req.params.config.split(';')
-
-    //     const resultCompareRedex = await maudeHelper.requestMaudeGetRedex(
-    //         configurationSplit[0],
-    //         configurationSplit[1],
-    //         configurationSplit[2]
-    //     )
-
-    //     const compareRedex = resultHelper.getRedex( resultCompareRedex )
-    //     let subs = ''
-    //     compareRedex.map(p => {
-    //         if( p.ir === req.params.index ){
-    //             subs = p.processSubs
-    //         }
-    //     })
-
-    //     const resultMetaApp = maudeHelper.requestMaudeMetaApp( req.params.config, subs )
-    //     const configuration = resultHelper.createModel( resultMetaApp )
-    //     const resultGetRedex = await maudeHelper.requestMaudeGetRedex(
-    //         configuration.definitions,
-    //         configuration.process,
-    //         configuration.constraints
-    //     )
-        
-    //     const redex = resultHelper.getRedex( resultGetRedex )
-    
-    //     configuration.configVisualization = configVisunHelper.getConfigVisualization(
-    //         configuration.definitions,
-    //         configuration.process,
-    //         configuration.constraints,
-    //         redex
-    //     )
-    //     const indexSplit = req.params.index.split(',')
-    //     configuration.from = resultHelper.getProcess(maudeHelper.requestMaudeGetProcess(`< ${req.params.config} >`, indexSplit[0], indexSplit[1])).trim()
-
-
-    //     redex.map((p) => {
-    //         configuration.clickableProcessIndex.push( p.ir )
-    //     })
-    //     res.send( configuration )
-
-    //  } catch( err ){
-    //     return res.status( 406 ).send( err )
-    //  }
+router.get('/expand/horizontal/:config/:index/:size/:mode', async (req, res) => {
+    maudeHelper.requestMaudeHorizontalMetaApp(req.params.config, req.params.index, req.params.size, req.params.mode)
+    .then(response => {
+        res.send(response)
+    })
+    .catch(err => res.status(500).send(err))
 })
 
 module.exports = app => app.use( '/maude', router )
