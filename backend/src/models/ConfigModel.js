@@ -4,6 +4,7 @@ module.exports = (definitions, process, constraints,) => {
         process: process,
         constraints: constraints,
         configVisualization: '',
-        clickableProcessIndex: []
+        clickableProcessIndex: [],
+        from: ''
     }
 }

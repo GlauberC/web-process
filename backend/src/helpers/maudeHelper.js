@@ -38,12 +38,6 @@ module.exports = {
             console.log(err)
         }
     },
-    requestMaudeParseMetaRed: async function (def, process, constraints){
-        try{
-        }catch(err){
-            console.log(err)
-        }
-    },
     requestMaudeGetRedex : function (config){
         try{
             return new Promise(               
@@ -90,37 +84,55 @@ module.exports = {
                         reject('Horizontal Expand - Timeout')
                     }, 5000)
 
-
+                    let arrayMetaApp = []
                     let configPerfect = `< ${config} >`.replace(/\(/ig, ' ( ').replace(/\)/ig, ' ) ').replace(/\,/ig, ' , ')
-                    let metaRedResult = await this.metaredExpand(configPerfect)
-                    let resultCompareRedex = await this.getRedexExpand(metaRedResult)
-                    let compareRedex = resultHelper.getRedex( resultCompareRedex )
-                    let subs = ''
-                    compareRedex.map(p => {
-                        if( p.ir === index ){
-                            subs = p.processSubs
-                        }
-                    })
-                    let metaAppResult = await this.MetaAppExpand(metaRedResult.trim(), subs)
-                    let redexResult = await this.getRedexExpand(metaAppResult)
-                    let resultMetaAppSplit = metaAppResult.replace('<', '').replace('>', '').split(' ; ')
-                    let configuration = ConfigModel(resultMetaAppSplit[0].trim(), resultMetaAppSplit[1].trim(), resultMetaAppSplit[2].trim())
-                    let redex = ''
-                    if (redexResult !== 'nil'){
-                        redex = resultHelper.getRedex(redexResult)
-                        redex.map((p) => {
-                            configuration.clickableProcessIndex.push( p.ir )
+
+                    for(let i = 0; i < size; i++){
+                        let metaRedResult = await this.metaredExpand(configPerfect)
+
+                        let resultCompareRedex = await this.getRedexExpand(metaRedResult)
+                        let compareRedex = resultHelper.getRedex( resultCompareRedex )
+                        let subs = ''
+                        compareRedex.map(p => {
+                            if( p.ir === index ){
+                                subs = p.processSubs
+                            }
                         })
-                    }else{
-                            redex = 'nil'
+                        let metaAppResult = await this.MetaAppExpand(metaRedResult.trim(), subs)
+                        let redexResult = await this.getRedexExpand(metaAppResult)
+                        let resultMetaAppSplit = metaAppResult.replace('<', '').replace('>', '').split(' ; ')
+                        let configuration = ConfigModel(resultMetaAppSplit[0].trim(), resultMetaAppSplit[1].trim(), resultMetaAppSplit[2].trim())
+                        let redex = ''
+                        if (redexResult !== 'nil'){
+                            redex = resultHelper.getRedex(redexResult)
+                            redex.map((p) => {
+                                configuration.clickableProcessIndex.push( p.ir )
+                            })
+                        }else{
+                                redex = 'nil'
+                        }
+                        let configVisu = await this.configVisu(
+                            configuration.definitions,
+                            configuration.process,
+                            configuration.constraints,
+                            redex
+                        )
+                        configuration.configVisualization = configVisu
+                        let indexs = index.split(',')
+                        configuration.from = await this.getProcessExpand(metaRedResult, indexs[0], indexs[1])
+                        arrayMetaApp.push(configuration)
+                        if(configuration.clickableProcessIndex.length === 0){
+                            break
+                        }else{
+                            configPerfect = `< ${configuration.definitions.trim()} ; ${configuration.process.trim()} ; ${configuration.constraints.trim()} >`
+                            if(mode === '1'){
+                                index = configuration.clickableProcessIndex[0]
+                            }else{
+                                index = configuration.clickableProcessIndex[Math.floor(Math.random() * configuration.clickableProcessIndex.length)]
+                            }
+                        }
                     }
-                    let configVisu = await this.configVisu(
-                        configuration.definitions,
-                        configuration.process,
-                        configuration.constraints,
-                        redex
-                    )
-                    resolve(configVisu)
+                    resolve(arrayMetaApp)
 
                     
                 }
@@ -147,6 +159,12 @@ module.exports = {
         const func = `MTAP`
         let subsSplit = subs.split(',')
         let command = `${func}${config}#${subsSplit[0].replace("'", "")}#${subsSplit[1].trim()}`
+        let result = await connectionHelper(command)
+        return result
+    },
+    getProcessExpand: async function(config, index0, index1){
+        const func = `GTPR`
+        let command = `${func}${config.trim()}#${index0.trim()}#${index1.trim()}`.trim()
         let result = await connectionHelper(command)
         return result
     },
@@ -181,9 +199,8 @@ module.exports = {
                     vizualizationProcess.push(p) 
                 }
             })
-            let test = vizualizationProcess.join(' && ') + ' ; ' + constraints
-            return test
             
+            return await new Promise(resolve => setTimeout(() => resolve(vizualizationProcess.join(' && ') + ' ; ' + constraints), 50));
         }else{
             return 'nil' + ' ; ' + constraints
         }
