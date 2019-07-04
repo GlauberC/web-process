@@ -2,12 +2,6 @@ const connectionHelper = require('./connectionHelper')
 const resultHelper = require('./resultHelper')
 const ConfigModel = require('../models/ConfigModel')
 
-
-
-
-var DIR_MAUDE = process.env.MAUDE_DIR
-var DIR_FILE_MAUDE = "./maude/process.maude -no-banner"
-
 module.exports = {
     requestMaudeMetaRed: async function (def, process, constraints){
         try{

@@ -227,45 +227,10 @@ export default class Tree extends Component{
                 errorMsg: 'Every process was already executed',
                 successMsg: '',
                 loading: false})
+        }else{
+            
         }
-        else{
-            this.setState({errorMsg: '', successMsg: '', loading: true})
-            let iterationBranch = branch
-            for(i; i <= this.state.expansionSize - 1; i++){
-                let index = 0
-                try{
-                    if(iterationBranch.clickableProcessIndex.length === 0){
-                        this.setState({errorMsg: '', successMsg: 'Endline - Expansion stopped', loading: false})
-                        break
-                    }else{
-                        if(mode === 0){
-                            index = iterationBranch.clickableProcessIndex[0]
-                        }else{
-                            let pos = Math.floor(Math.random()*iterationBranch.clickableProcessIndex.length)
-                            index = iterationBranch.clickableProcessIndex[pos]
-                        }
-                        let lastPos = iterationBranch.children.length
-                        await this.metaAppFetch(iterationBranch, index)
-                        iterationBranch = iterationBranch.children[lastPos]
-                    }
-    
-                }catch(err){
-                    if(this.state.errorMsg === ''){
-                        this.setState({errorMsg: 'Expansion stopped - There was an internal error. ', successMsg: '', loading: false})
-                    }else{
-                        this.setState({errorMsg: "Expansion stopped - " + this.state.errorMsg, successMsg: '', loading: false})
-                    }
-                    break
-                }
-            }
-
-        }
-        if(i === this.state.expansionSize){
-            this.setState({
-                errorMsg: '',
-                successMsg: 'A horizontal expansion was executed',
-                loading: false})
-        }
+       
         
     }
 

@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "MAUDE_DIR='/usr/bin/maude' mocha",
-    "start": "MAUDE_DIR='/usr/bin/maude' node index.js"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
