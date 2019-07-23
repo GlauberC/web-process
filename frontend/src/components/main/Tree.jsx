@@ -11,6 +11,7 @@ export default class Tree extends Component{
         this.props = props
         this.config = `${this.props.initialConfig.definitions} ; ${this.props.initialConfig.process} ; ${this.props.initialConfig.constraints}`
         this.state = {
+            defs: [],
             run: 0,
             errorMsg: '',
             successMsg: '',
@@ -30,6 +31,11 @@ export default class Tree extends Component{
                 '0')
         this.setState({treeData: firstBranch})
 
+    }
+    componentDidMount(){
+        let defs = this.props.initialConfig.definitions !== 'empty' ? this.props.initialConfig.definitions.replace(/def\s\(/ig, '|x|').replace(/\)$/, '').split('|x|') : ['empty']
+        defs.shift()
+        this.setState({defs: defs})
     }
 
     branchFactory = (parent, config, content, clickableProcessIndex, from = '', name = '') => {
@@ -318,7 +324,7 @@ export default class Tree extends Component{
         let successMsg = this.state.successMsg === '' ? '' : <div className = "alert alert-success"><p>{this.state.successMsg}</p></div>
         let loading = this.state.loading ? <ReactLoading type="spokes" color='#000000' height ='5%' width = '5%' className = 'loading' /> : ''
 
-        let defs = this.props.initialConfig.definitions !== 'empty' ? this.props.initialConfig.definitions.replace(/def\(/ig, '').replace(/\)$/, '').split('),') : ['empty']
+  
         return(
             <div>
                 {loading}
@@ -369,8 +375,10 @@ export default class Tree extends Component{
                             <div className = "definitions">
                                 <h3>Definitions:</h3>
                                 <ul className = 'list-definition'>
-                                    {defs.map(d => <li className = 'mt-2'>{d.replace(',' , ' =')}</li>)}
+
+                                {this.state.defs.map(d => <li key = {d}>{d.replace(',', '=')}</li>)}
                                 </ul>
+                                
                             </div>
 
                         </div>

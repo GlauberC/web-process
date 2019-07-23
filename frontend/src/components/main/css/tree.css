@@ -45,3 +45,14 @@ svg{
 ul.list-definition{
   list-style: none;
 }
+ul.list-definition li{
+  font-size: 14px;
+  margin-bottom: 0.5em;
+  padding: 5px;
+  border-bottom: solid 1px gray;
+}
+
+ul.list-definition li:hover{
+  font-size: 16px;
+  font-weight: bold;
+}

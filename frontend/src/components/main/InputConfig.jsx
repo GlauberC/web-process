@@ -59,6 +59,7 @@ export default class InputConfig extends Component{
     
     parse = async () => {
         const config = this.getData()
+        
         if (config){
             const options = {
                 method: 'POST',
@@ -136,6 +137,7 @@ export default class InputConfig extends Component{
     addDefinition = () => {
         this.setState({numDefinitions: this.state.numDefinitions + 1})
     }
+
     render(){
         return (
         <div className = "mt-4">
@@ -156,9 +158,31 @@ export default class InputConfig extends Component{
                 <hr/>
                 <button onClick = {this.parse} className = "btn btn-primary mt-4">Parse Config</button>
                 <button onClick = {this.createConfig} className = "btn btn-success mt-4 right-button">Create Config</button>
+                <hr/>
+                <h2>Examples:</h2>
+                <button onClick = {() => this.examples(0)} className = "btn btn-secondary mt-4">3 dining philosophers </button>
 
             </div>
         </div>
         )
+    }
+
+    examples = async n => {
+        if (n === 0){
+            await this.setState({numDefinitions: 9})
+            let defs = document.querySelectorAll('.input-definition')
+            document.querySelector('.textInput').value = "tell('f0) || tell('f1)  || tell('f2) || call('P0) || call('P1) || call('P2) ; empty"
+            defs[0].value = "'P0,  lask ('f0 ^ 'f1) then call('P0E)"
+            defs[1].value = "'P0E, lask ('eat0) then call('P0R) || tell('eat0)"
+            defs[2].value = "'P0R, tell('f0) || tell('f1) || call('P0)"
+            defs[3].value = "'P1,  lask ('f1 ^ 'f2) then call('P1E)"
+            defs[4].value = "'P1E, lask ('eat1) then call('P1R) || tell('eat1)"
+            defs[5].value = "'P1R, tell('f1) || tell('f2) || call('P1)"
+            defs[6].value = "'P2,  lask ('f2 ^ 'f0) then call('P2E)"
+            defs[7].value = "'P2E, lask ('eat2) then call('P2R) || tell('eat2)"
+            defs[8].value = "'P2R, tell('f2) || tell('f0) || call('P2)"
+        }
+        
+        
     }
 }
