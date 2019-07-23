@@ -1,0 +1,13 @@
+tell('f0) || tell('f1)  || tell('f2) || call('P0) || call('P1) || call('P2) ; empty
+
+'P0,  lask ('f0 ^ 'f1) then call('P0E)
+'P0E, lask ('eat0) then call('P0R) || tell('eat0)
+'P0R, tell('f0) || tell('f1) || call('P0)
+
+'P1,  lask ('f1 ^ 'f2) then call('P1E)
+'P1E, lask ('eat1) then call('P1R) || tell('eat1)
+'P1R, tell('f1) || tell('f2) || call('P1)
+
+'P2,  lask ('f2 ^ 'f0) then call('P2E)
+'P2E, lask ('eat2) then call('P2R) || tell('eat2)
+'P2R, tell('f2) || tell('f0) || call('P2)

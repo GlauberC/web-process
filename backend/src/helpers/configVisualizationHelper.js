@@ -11,9 +11,10 @@ module.exports = {
                 if(process !== 'nil'){
                     let config = `< ${def} ; ${process} ; ${constraints}  >`
                     let processSplit = process.split('&&')
-                    let vizualizationProcess = []
+                    let vizualizationProcess = `${process} ; ${constraints}`
                     var ir = ''
                     await processSplit.forEach(async (p, index) => {
+                        
                         if(!p.match(/^\s*\(*\s*l*ask/ig)){
                             // there is no ask or lask
                             ir = index + ', None'
@@ -22,24 +23,25 @@ module.exports = {
                                 let rSplit = redex[i].ir.split(',')
                                 if(index === Number(rSplit[0])){
                                     let resultGetProcess = await maudeHelper.requestMaudeGetProcess(config, rSplit[0], rSplit[1])
-                                    p = await p.trim().replace(resultGetProcess.trim(), `c**${resultGetProcess}**c`)
+                                    console.log(resultGetProcess)
+                                    p = resultGetProcess
+                                    vizualizationProcess = vizualizationProcess.replace(p.trim() + " ", "c**"+ p.trim() + "**c ")
                                 }
                             }      
-                        }                   
+                        }          
                         if (ir !== ''){
                             redex.map((r2) => {
                                 if(r2.ir == ir){
-                                    p = 'c**' + p.trim() + '**c'
                                     ir = ''
                                 }
                             })
-                            vizualizationProcess.push(p)                            
-                        }else{
-                            vizualizationProcess.push(p) 
+                            vizualizationProcess = vizualizationProcess.replace(p.trim() + " ", "c**"+ p.trim() + "**c ")                               
                         }
+                        
+                        
                     })
                     setTimeout(() => {
-                        resolve(vizualizationProcess.join(' && ') + ' ; ' + constraints)
+                        resolve(vizualizationProcess)
                     }, 50)
                 }else{
                     resolve('nil' + ' ; ' + constraints)

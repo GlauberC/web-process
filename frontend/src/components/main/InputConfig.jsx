@@ -59,7 +59,6 @@ export default class InputConfig extends Component{
     
     parse = async () => {
         const config = this.getData()
-
         if (config){
             const options = {
                 method: 'POST',

@@ -97,6 +97,7 @@ export default class Tree extends Component{
         })
         showConfig = arrShowConfig.join('').replace(/&&/ig, '||')
         node.setAttribute("data-tippy-content", `${showConfig}`)
+        
         tippy(node, {           
             trigger: 'mouseenter',
             animation: 'fade',
@@ -151,7 +152,7 @@ export default class Tree extends Component{
         const response = await fetch(`http://localhost:3001/maude/${branch.config}/${index}`, options)
         if(await response.status === 200){
             response.json().then( (res) => {
-
+                console.log(res)
                 let treeData = this.state.treeData
                 let newConfig = `${res.definitions} ; ${res.process} ; ${res.constraints}` 
                 if(this.isSon(branch, newConfig)){

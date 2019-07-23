@@ -57,6 +57,7 @@ router.get( '/:config/:index', ( req, res ) => {
         .then(resultCompareRedex => {
             const compareRedex = resultHelper.getRedex( resultCompareRedex )
             let subs = ''
+            
             compareRedex.map(p => {
                 if( p.ir === req.params.index ){
                     subs = p.processSubs
