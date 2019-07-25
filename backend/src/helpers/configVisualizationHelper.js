@@ -23,7 +23,6 @@ module.exports = {
                                 let rSplit = redex[i].ir.split(',')
                                 if(index === Number(rSplit[0])){
                                     let resultGetProcess = await maudeHelper.requestMaudeGetProcess(config, rSplit[0], rSplit[1])
-                                    console.log(resultGetProcess)
                                     p = resultGetProcess
                                     vizualizationProcess = vizualizationProcess.replace(p.trim() + " ", "c**"+ p.trim() + "**c ")
                                 }

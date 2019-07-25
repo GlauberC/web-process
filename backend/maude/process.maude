@@ -6,10 +6,8 @@ mod PROCESS is
     subsort AskProcess < Process .
 
     op skip : -> Process .
-    op _||_ : Process Process -> Process [ctor assoc prec 20] .
+    op _||_ : Process Process -> Process [ctor assoc prec 45] .
     op tell : Constraint -> Process .
-
-
     op ask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
     op lask_then_ : Constraint Process -> AskProcess [ctor prec 40] .
     op _+_ : AskProcess AskProcess -> AskProcess [assoc id: zero] .

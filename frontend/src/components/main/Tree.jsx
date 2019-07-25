@@ -107,6 +107,7 @@ export default class Tree extends Component{
         tippy(node, {           
             trigger: 'mouseenter',
             animation: 'fade',
+            delay: 100,
             interactive: true
             
         })
