@@ -49,12 +49,15 @@ export default class NavBar extends Component{
                     <h2>Processes:</h2>
                     <ul>
                         <li>{`Nil Process  |   skip`}</li>
+                        <li>{`Parallel |   C || C`}</li>
                         <li>{`tell process | tell(C) `}</li>
-                        <li>{`Conjunction |   C /\\ C`}</li>
+                        <li>{`ask process | ask(C) then (P) `}</li>
+                        <li>{`lask process | lask(C) then (P) `}</li>
+                        <li>{`call process | call(D) `}</li>
                     </ul>
                     <h2>Definitions:</h2>
                     <ul>
-                        <li>{`declaration |  name = P`}</li>
+                        <li>{`declaration |  name, P`}</li>
                     </ul>
 
                     
