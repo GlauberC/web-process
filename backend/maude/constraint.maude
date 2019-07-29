@@ -49,8 +49,24 @@ fmod CONSTRAINTS-OPERATIONS is
 
     eq (L , C ^ C')  |-- L' = (L , C , C') |-- L' .
 
-    eq minus((L), (L)) = empty .
-    eq minus((L, S), (L', S)) = L .
+    --- eq minus((L), (L)) = empty .
+    --- eq minus((L, S), (L', S)) = L .
+    
+    op $toAtom : Constraint -> Set{Constraint} .
+    op toAtom : Set{Constraint} -> Set{Constraint} .
+    eq $toAtom(True) = empty .
+    eq $toAtom(a) = a .
+    eq $toAtom(C ^ C') = ( $toAtom(C) , $toAtom(C')) .
+    eq toAtom(empty) = empty .
+    eq toAtom( (C, S)) = $toAtom(C), toAtom(S) .
+    eq minus(S, S') = $minus(toAtom(S) , toAtom(S')) .
+    --- We assume that all are atoms
+    op $minus : Set{Constraint} Set{Constraint}  -> Set{Constraint}  .
+    eq $minus( empty , S') = empty .
+    eq $minus( (a, S) , (a, S')) = $minus(S, S') .
+    eq $minus( (a, S) , (S')) = a , $minus(S, S') [owise] .
+
+    
 
     eq L |-- True = true .
     eq (L, a) |-- a = true .
