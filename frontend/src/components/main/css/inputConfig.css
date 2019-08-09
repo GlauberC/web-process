@@ -7,3 +7,23 @@
     width: 5em;
     padding: auto;
 }
+
+.modal-body .container p {
+    text-align: justify;
+}
+
+.Tutorial{
+    display: flex;
+    justify-content: flex-start;
+    margin: 0 0 30px 0;
+    width: 50%;
+    flex-wrap: wrap;
+}
+
+.Tutorial button {
+    padding: 10px 30px;
+    margin: 0 10px;
+}
+.Tutorial button.nondeterm{
+    padding: 10px 10px;
+}

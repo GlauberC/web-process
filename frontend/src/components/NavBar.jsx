@@ -38,26 +38,26 @@ export default class NavBar extends Component{
                 <div className="modal-body">
                     
 
-                    <h2>Constraints:</h2>
+                    <h3>Constraints:</h3>
                     <ul>
-                        <li>{`True   | True`}</li>
-                        <li>{`Atomic constraint   | 'a, 'b, 'c, etc`}</li>
-                        <li>{`Conjunction |   C /\\ C`}</li>
+                        <li>{`True: True`}</li>
+                        <li>{`Atomic constraint: 'a, 'b, 'c, etc`}</li>
+                        <li>{`Conjunction:   C /\\ C`}</li>
                     </ul>
 
 
-                    <h2>Processes:</h2>
+                    <h3>Processes:</h3>
                     <ul>
-                        <li>{`Nil Process  |   skip`}</li>
-                        <li>{`Parallel |   C || C`}</li>
-                        <li>{`tell process | tell(C) `}</li>
-                        <li>{`ask process | ask(C) then (P) `}</li>
-                        <li>{`lask process | lask(C) then (P) `}</li>
-                        <li>{`call process | call(D) `}</li>
+                        <li>{`Nil Process:   skip`}</li>
+                        <li>{`Parallel:   C || C`}</li>
+                        <li>{`tell process: tell(C) `}</li>
+                        <li>{`ask process: ask(C) then (P) `}</li>
+                        <li>{`lask process: lask(C) then (P) `}</li>
+                        <li>{`call process: call(D) `}</li>
                     </ul>
-                    <h2>Definitions:</h2>
+                    <h3>Definitions:</h3>
                     <ul>
-                        <li>{`declaration |  name, P`}</li>
+                        <li>{`Declaration:   name, P`}</li>
                     </ul>
 
                     
@@ -80,7 +80,31 @@ export default class NavBar extends Component{
                     <button type="button" className="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div className="modal-body">
-                    About...
+                    <div className = 'container'>     
+                        <p>Concurrent Constraint Programming (CCP) is a model of concurrency based upon the shared-variables communication model. Agents in CCP interact by posting (tell) and querying (ask) constrains on a common store of partial information. </p>
+
+                        <p>This tool offers the possibility of writing CCP programs and observing the resulting behavior. We have provided the constructs that are common to all CCP language, namely, tell, ask, parallel composition and recursion. Moreover, it is also possible to specify non-deterministic behavior (guarded summation) and linear asks that may consume information from the store.</p>
+
+                        <br/>
+                        <h4>Authors:</h4>  
+                        <p>Web interface: Glauber Carvalho. </p>
+
+
+
+                        <p>
+                            <b>Authors &#8678; Subtitle</b>
+                            <br/> Web interface:
+                            <a href="https://github.com/GlauberC">Glauber Carvalho.</a>
+                            <br/>
+                            <a href="https://sites.google.com/site/carlosolarte/">Carlos Olarte. </a>
+                            <br/>
+                            <br/>
+                            <b>Contact &#8678; Subtitle</b>
+                            <br/>
+                            <a href="https://sites.google.com/site/carlosolarte/">Carlos Olarte </a>
+                        </p>
+                    </div>
+
                 </div>
 
                 <div className="modal-footer">

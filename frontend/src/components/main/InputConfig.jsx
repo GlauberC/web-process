@@ -159,6 +159,15 @@ export default class InputConfig extends Component{
                 <button onClick = {this.parse} className = "btn btn-primary mt-4">Parse Config</button>
                 <button onClick = {this.createConfig} className = "btn btn-success mt-4 right-button">Create Config</button>
                 <hr/>
+                <h2>Tutorial:</h2>
+                <div className = "Tutorial">
+                    <button onClick = {() => this.examples(1)} className = "btn btn-secondary mt-4">tell </button>
+                    <button onClick = {() => this.examples(2)} className = "btn btn-secondary mt-4">ask </button>
+                    <button onClick = {() => this.examples(3)} className = "btn btn-secondary mt-4">lask </button>
+                    <button onClick = {() => this.examples(4)} className = "btn btn-secondary mt-4">call </button>
+                    <button onClick = {() => this.examples(5)} className = "btn btn-secondary mt-4">parallel </button>
+                    <button onClick = {() => this.examples(6)} className = "btn btn-secondary mt-4 nondeterm">Non-deterministic choice </button>
+                </div>
                 <h2>Examples:</h2>
                 <button onClick = {() => this.examples(0)} className = "btn btn-secondary mt-4">3 dining philosophers </button>
 
@@ -181,6 +190,32 @@ export default class InputConfig extends Component{
             defs[6].value = "'P2,  lask ('f2 ^ 'f0) then call('P2E)"
             defs[7].value = "'P2E, lask ('eat2) then call('P2R) || tell('eat2)"
             defs[8].value = "'P2R, tell('f2) || tell('f0) || call('P2)"
+        }else if (n === 1){
+            await this.setState({numDefinitions: 0})
+            document.querySelector('.textInput').value = "tell('a) ; empty"
+        
+        }else if (n === 2){
+            await this.setState({numDefinitions: 0})
+            document.querySelector('.textInput').value = "ask('a) then (tell('b)) ; 'a"
+        
+        }else if (n === 3){
+            await this.setState({numDefinitions: 0})
+            document.querySelector('.textInput').value = "lask('a) then (tell('b)) ; 'a"
+        
+        }else if (n === 4){
+            await this.setState({numDefinitions: 1})
+            document.querySelector('.textInput').value = "call('def) ; 'a"
+            let defs = document.querySelectorAll('.input-definition')
+            defs[0].value = "'def,  ask('a) then tell('b)"
+        
+        }else if (n === 5){
+            await this.setState({numDefinitions: 0})
+            document.querySelector('.textInput').value = "tell('b) || ask 'a then tell('c) || lask 'b then tell('d) ; 'a"
+        
+        }else if (n === 6){
+            await this.setState({numDefinitions: 0})
+            document.querySelector('.textInput').value = " ask('a) then tell('b') + ask('a) then tell('c') + ask('a) then tell('d'); 'a"
+        
         }
         
         
